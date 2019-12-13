@@ -211,7 +211,7 @@ if not args.nofix:
 	else:
 		xy_bounds = str(xy_bounds).upper()
 
-	while not re.match('^NULL$|^c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)$|^rbind\s*\((\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*,\s*)+\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*\)$', xy_bounds):
+	while not re.match('^NULL$|^c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*$|^rbind\s*\((\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*,\s*)+\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*\)$', xy_bounds):
 		xy_bounds = str(input("Error: xy_bounds improperly defined. Please enter xy_bounds: ")).upper()
 		if not 'xy_bounds' in globals():
 			xy_bounds = "NULL"
@@ -313,7 +313,7 @@ if not args.nofix:
 	else:
 		k_bounds = str(k_bounds)
 
-	while not re.match('^c\(-?[0-9]*(\.[0-9]+)?,[ ]*-?[0-9]*(\.[0-9]+)?\)$', k_bounds):
+	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', k_bounds):
 		k_bounds = str(input("Error: invalid setting for k_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
 		if not 'k_bounds' in globals():
 			k_bounds = "c(-.1, .1)"
@@ -323,12 +323,12 @@ if not args.nofix:
 	else:
 		o_bounds = str(o_bounds)
 
-	while not re.match('^c\(-?[0-9]*(\.[0-9]+)?,[ ]*-?[0-9]*(\.[0-9]+)?\)$', o_bounds):
+	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', o_bounds):
 		o_bounds = str(input("Error: invalid setting for o_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
 		if not 'o_bounds' in globals():
 			o_bounds = "c(-50, 50)"
 
-	while not re.match('^c\(-?[0-9]*(\.[0-9]+)?,[ ]*-?[0-9]*(\.[0-9]+)?\)$', s_bounds):
+	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', s_bounds):
 		s_bounds = str(input("Error: invalid setting for s_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
 		if not 's_bounds' in globals():
 			s_bounds = "c(1, 20)"
