@@ -36,7 +36,7 @@ else:
 
 if args.nofix and args.nosentences and args.noquestions and args.nocombine:
 	print("Nothing to do with all of nofix, nosentences, noquestions, and nocombine set. Exiting...")
-	sys.exit(0)
+	sys.exit(1)
 
 if args.refix and args.nofix:
 	print("Warning: refix and nofix cannot both be set. nofix will be respected.")
@@ -88,7 +88,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				else:
 					break
 			except:
-				asc_files_dir = Path(input(f"Error: no ASC files found in '{asc_files_dir}'. If your ASC files have already been fix aligned, set the asc_files_dir to the location of your fix aligned files, and use the '--nofix' ('-nf') option. Please enter a directory containing ASC files: "))
+				asc_files_dir = Path(input(f"Error: no directory found at '{asc_files_dir}'. Please enter a valid directory containing ASC files: "))
 				if not asc_files_dir:
 					asc_files_dir = current_dir / "ASC"
 
@@ -107,7 +107,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 
 		output_dir = Path(output_dir)
 
-	if not args.nosentences or not args.noquestions:
+	if not args.nosentences or not args.noquestions or not args.nocombine:
 		if not 'config_json_loc' in globals():
 			config_json_loc = current_dir / "config.json"
 
@@ -151,9 +151,9 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 	# Stimuli loc is optional, but print a warning if we're not using it, also check for file_encoding
 	if not args.nocombine:
 		if not 'stimuli_loc' in globals():
-			stimuli_loc = "".join([current_dir / f for f in os.listdir(current_dir) if '-formatted.csv' in f])
+			stimuli_loc = "".join([str(current_dir / f) for f in os.listdir(current_dir) if '-formatted.csv' in f])
 
-		if not re.match('.csv$', str(stimuli_loc).lower()):
+		if not re.match('.*\.csv$', str(stimuli_loc).lower()):
 			stimuli_loc = Path(str(stimuli_loc) + '.csv')
 
 		if not os.path.isfile(stimuli_loc):
@@ -211,7 +211,7 @@ if not args.nofix:
 	else:
 		xy_bounds = str(xy_bounds).upper()
 
-	while not re.match('^NULL$|^c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*$|^rbind\s*\((\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*,\s*)+\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*\)$', xy_bounds):
+	while not re.match('^NULL$|^c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)$|^rbind\s*\((\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*,\s*)+\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*\)$', xy_bounds):
 		xy_bounds = str(input("Error: xy_bounds improperly defined. Please enter xy_bounds: ")).upper()
 		if not 'xy_bounds' in globals():
 			xy_bounds = "NULL"
@@ -313,7 +313,7 @@ if not args.nofix:
 	else:
 		k_bounds = str(k_bounds)
 
-	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', k_bounds):
+	while not re.match('^c\(-?[0-9]*(\.[0-9]+)?,[ ]*-?[0-9]*(\.[0-9]+)?\)$', k_bounds):
 		k_bounds = str(input("Error: invalid setting for k_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
 		if not 'k_bounds' in globals():
 			k_bounds = "c(-.1, .1)"
@@ -323,12 +323,17 @@ if not args.nofix:
 	else:
 		o_bounds = str(o_bounds)
 
-	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', o_bounds):
+	while not re.match('^c\(-?[0-9]*(\.[0-9]+)?,[ ]*-?[0-9]*(\.[0-9]+)?\)$', o_bounds):
 		o_bounds = str(input("Error: invalid setting for o_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
 		if not 'o_bounds' in globals():
 			o_bounds = "c(-50, 50)"
 
-	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', s_bounds):
+	if not 's_bounds' in globals():
+		s_bounds = "c(1, 20)"
+	else:
+		s_bounds = str(s_bounds)
+
+	while not re.match('^c\(-?[0-9]*(\.[0-9]+)?,[ ]*-?[0-9]*(\.[0-9]+)?\)$', s_bounds):
 		s_bounds = str(input("Error: invalid setting for s_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
 		if not 's_bounds' in globals():
 			s_bounds = "c(1, 20)"
@@ -425,7 +430,7 @@ if not args.nofix:
 				os.remove("fix_align_tmp.r")
 			except:
 				print("Unable to delete existing fix_align_tmp file. Exiting...")
-				sys.exit(1)
+				sys.exit(0)
 
 		# Get rid of the old summary files if we're refix aliging files. If we're not, then we're only
 		# Fix aligning files that don't have existing ones, and we might want to keep the old summary
@@ -447,7 +452,7 @@ if not args.nofix:
 				os.remove("fix_align_tmp.r")
 			except:
 				print("Unable to delete fix_align_tmp file.")
-				sys.exit(1)
+				sys.exit(0)
 
 		try:
 			os.remove("fix_align_tmp.r")
@@ -465,6 +470,14 @@ else:
 	file_list = os.listdir(fa_output_dir)
 	file_list = [str(Path(fa_output_dir) / f) for f in file_list if '.asc' in f]
 
+# Get correct names for columns to use when joining results from the settings in the config file
+if not args.noquestions or not args.nocombine or not args.nosentences:
+	with open(Path(config_json_loc), "r") as file:
+		config_txt = file.read()
+		filename_col_name = re.findall(r'"trial_output"[\s\S]*?"filename"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
+		item_id_col_name = re.findall(r'"trial_output"[\s\S]*?"item_id"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
+		item_condition_col_name = re.findall(r'"trial_output"[\s\S]*?"item_condition"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
+
 # Sentences
 if not args.nosentences:
 	if os.path.isfile(csv_loc) and not args.overwrite:
@@ -477,14 +490,6 @@ if not args.nosentences:
 		asc_files = sideeye.parser.experiment.parse_files(file_list, str(sentences_txt_loc), sideEyeConfig)
 
 		sideeye.calculate_all_measures(asc_files, csv_loc, sideEyeConfig)
-
-# Get correct names for columns to use when joining results from the settings in the config file
-if not args.noquestions or not args.nocombine:
-	with open(Path(config_json_loc), "r") as file:
-		config_txt = file.read()
-		filename_col_name = re.findall(r'"trial_output"[\s\S]*?"filename"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
-		item_id_col_name = re.findall(r'"trial_output"[\s\S]*?"item_id"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
-		item_condition_col_name = re.findall(r'"trial_output"[\s\S]*?"item_condition"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
 
 # Questions
 if not args.noquestions:
@@ -513,7 +518,7 @@ if not args.noquestions:
 				filename = open(file, 'r')
 			except:
 				print("File %s could not be found." %file)
-				sys.exit(1)
+				sys.exit(0)
 
 			if args.verbose:
 				print(file)
@@ -596,14 +601,14 @@ if not args.nocombine:
 			not os.path.isfile(summary_file_name) and 
 			not os.path.isfile(csv_loc)):
 			print("No results found to combine. Exiting...")
-			sys.exit(1)
+			sys.exit(0)
 
 		print("Combining results...")
 		# Check if the columns we need to conjoin the output are included in the output, and if not, exit
 		is_item_id_included = re.findall(r'"region_output"[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false"  or len(re.findall(r'"region_output[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 		if not is_item_id_included:
 			print("item_id not included in results. Cannot combine results.")
-			sys.exit(1)
+			sys.exit(0)
 
 		is_filename_included = re.findall(r'"region_output"[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 
@@ -726,4 +731,4 @@ if not args.nocombine:
 						print("Unable to delete non-combined questions summary file.")
 
 print("Completed successfully!")
-sys.exit(0)
+sys.exit(1)
