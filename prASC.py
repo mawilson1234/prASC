@@ -36,7 +36,7 @@ else:
 
 if args.nofix and args.nosentences and args.noquestions and args.nocombine:
 	print("Nothing to do with all of nofix, nosentences, noquestions, and nocombine set. Exiting...")
-	sys.exit(1)
+	sys.exit(0)
 
 if args.refix and args.nofix:
 	print("Warning: refix and nofix cannot both be set. nofix will be respected.")
@@ -425,7 +425,7 @@ if not args.nofix:
 				os.remove("fix_align_tmp.r")
 			except:
 				print("Unable to delete existing fix_align_tmp file. Exiting...")
-				sys.exit(0)
+				sys.exit(1)
 
 		# Get rid of the old summary files if we're refix aliging files. If we're not, then we're only
 		# Fix aligning files that don't have existing ones, and we might want to keep the old summary
@@ -447,7 +447,7 @@ if not args.nofix:
 				os.remove("fix_align_tmp.r")
 			except:
 				print("Unable to delete fix_align_tmp file.")
-				sys.exit(0)
+				sys.exit(1)
 
 		try:
 			os.remove("fix_align_tmp.r")
@@ -513,7 +513,7 @@ if not args.noquestions:
 				filename = open(file, 'r')
 			except:
 				print("File %s could not be found." %file)
-				sys.exit(0)
+				sys.exit(1)
 
 			if args.verbose:
 				print(file)
@@ -596,14 +596,14 @@ if not args.nocombine:
 			not os.path.isfile(summary_file_name) and 
 			not os.path.isfile(csv_loc)):
 			print("No results found to combine. Exiting...")
-			sys.exit(0)
+			sys.exit(1)
 
 		print("Combining results...")
 		# Check if the columns we need to conjoin the output are included in the output, and if not, exit
 		is_item_id_included = re.findall(r'"region_output"[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false"  or len(re.findall(r'"region_output[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 		if not is_item_id_included:
 			print("item_id not included in results. Cannot combine results.")
-			sys.exit(0)
+			sys.exit(1)
 
 		is_filename_included = re.findall(r'"region_output"[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 
@@ -726,4 +726,4 @@ if not args.nocombine:
 						print("Unable to delete non-combined questions summary file.")
 
 print("Completed successfully!")
-sys.exit(1)
+sys.exit(0)
