@@ -107,7 +107,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 
 		output_dir = Path(output_dir)
 
-	if not args.nosentences and not args.noquestions:
+	if not args.nosentences or not args.noquestions:
 		if not 'config_json_loc' in globals():
 			config_json_loc = current_dir / "config.json"
 
