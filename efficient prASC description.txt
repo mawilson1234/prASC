@@ -1,0 +1,13 @@
+The efficient branch is an in-progress version of prASC.py that is set up to not reprocess
+sentences/questions for which data already exists in results files. For this to work,
+results files must have the names prASC assigns them ('results.csv' for sentences, 'subject_question_info.txt' and
+'question_summary.txt' for questions, and 'results_combined.csv' for the CSV combining sentences and questions),
+and these files must be in the user-specified output directory. If nocombine is set, the script looks for
+existing results info in the uncombined results files; if it is not set, it looks for info in results_combined.csv.
+
+It uses this info to construct a list of filenames already in the results files, and removes files with those
+names from the list of files to process for sentences/questions. This means that any ASC files you have not
+yet processed should not have the same name as those in the existing results files in order for them to be
+properly processed. In addition, it will ignore directory information when comparing files in the directory
+that is to be processed with those specified in the results file, and only compare file names. Take this into
+account when setting your directories in the parameters file.
