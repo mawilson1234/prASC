@@ -145,6 +145,11 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 		else:
 			start_flag = str(start_flag).upper()
 
+		while not re.match('^TRIALID$|^SYNCTIME$', start_flag):
+			start_flag = str(input("Error: invalid setting for start_flag. Please enter one of: TRIALID, SYNCTIME: ")).upper()
+		if not start_flag:
+			start_flag = "TRIALID"
+
 		def strip_quotes(input):
 			return re.sub(r'^\'|^"|\'$|"$', '', str(input))
 
@@ -213,7 +218,7 @@ if not args.nofix:
 
 	while not re.match('^NULL$|^c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*$|^rbind\s*\((\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*,\s*)+\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*\)\s*\)$', xy_bounds):
 		xy_bounds = str(input("Error: xy_bounds improperly defined. Please enter xy_bounds: ")).upper()
-		if not 'xy_bounds' in globals():
+		if not xy_bounds:
 			xy_bounds = "NULL"
 
 	boolean_check = re.compile('^T$|^F$|^TRUE$|^FALSE$')
@@ -225,7 +230,7 @@ if not args.nofix:
 
 	while not boolean_check.match(keep_y_var):
 		keep_y_var = str(input("Error: invalid setting for keep_y_var. Please enter T or F: ")).upper()
-		if not 'keep_y_var' in globals():
+		if not keep_y_var:
 			keep_y_var = "FALSE"
 
 	if not 'use_run_rule' in globals():
@@ -235,7 +240,7 @@ if not args.nofix:
 
 	while not boolean_check.match(use_run_rule):
 		use_run_rule = str(input("Error: invalid setting for use_run_rule. Please enter T or F: ")).upper()
-		if not 'use_run_rule' in globals():
+		if not use_run_rule:
 			use_run_rule = "TRUE"
 
 	if not 'trial_plots' in globals():
@@ -245,7 +250,7 @@ if not args.nofix:
 
 	while not boolean_check.match(trial_plots):
 		trial_plots = str(input("Error: invalid setting for trial_plots. Please enter T or F: ")).upper()
-		if not 'trial_plots' in globals():
+		if not trial_plots:
 			trial_plots = "FALSE"
 
 	if not 'save_trial_plots' in globals():
@@ -255,7 +260,7 @@ if not args.nofix:
 
 	while not boolean_check.match(save_trial_plots):
 		save_trial_plots = str(input("Error: invalid setting for save_trial_plots. Please enter T or F: ")).upper()
-		if not 'save_trial_plots' in globals():
+		if not save_trial_plots:
 			save_trial_plots = "FALSE"
 
 	if not 'summary_file' in globals():
@@ -265,7 +270,7 @@ if not args.nofix:
 
 	while not boolean_check.match(summary_file):
 		summary_file = str(input("Error: invalid setting for whether to generate fix_align summary file. Please enter T or F: ")).upper()
-		if not 'summary_file' in globals():
+		if not summary_file:
 			summary_file = "TRUE"
 
 	if not 'show_image' in globals():
@@ -275,7 +280,7 @@ if not args.nofix:
 
 	while not boolean_check.match(show_image):
 		show_image = str(input("Error: invalid setting for show_image. Please enter T or F: ")).upper()
-		if not 'show_image' in globals():
+		if not show_image:
 			show_image = "FALSE"
 
 	if not 'start_flag' in globals():
@@ -285,7 +290,7 @@ if not args.nofix:
 
 	while not re.match('^TRIALID$|^SYNCTIME$', start_flag):
 		start_flag = str(input("Error: invalid setting for start_flag. Please enter one of: TRIALID, SYNCTIME: ")).upper()
-		if not 'start_flag' in globals():
+		if not start_flag:
 			start_flag = "TRIALID"
 
 	if not 'den_sd_cutoff' in globals():
@@ -295,7 +300,7 @@ if not args.nofix:
 
 	while not re.match('^Inf$|^-?[0-9]+(\.?[0-9]+)?$', den_sd_cutoff):
 		den_sd_cutoff = str(input("Error: invalid setting for den_sd_cutoff. Please enter a number or 'Inf': "))
-		if not 'den_sd_cutoff' in globals():
+		if not den_sd_cutoff:
 			den_sd_cutoff = "Inf"
 
 	if not 'den_ratio_cutoff' in globals():
@@ -305,7 +310,7 @@ if not args.nofix:
 
 	while not re.match('^Inf$|^-?[0-9]+(\.?[0-9]+)?$', den_ratio_cutoff):
 		den_ratio_cutoff = str(input("Error: invalid setting for den_ratio_cutoff. Please enter a number: "))
-		if not 'den_ratio_cutoff' in globals():
+		if not den_ratio_cutoff:
 			den_ratio_cutoff = "1"
 
 	if not 'k_bounds' in globals():
@@ -315,7 +320,7 @@ if not args.nofix:
 
 	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', k_bounds):
 		k_bounds = str(input("Error: invalid setting for k_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
-		if not 'k_bounds' in globals():
+		if not k_bounds:
 			k_bounds = "c(-.1, .1)"
 
 	if not 'o_bounds' in globals():
@@ -325,7 +330,7 @@ if not args.nofix:
 
 	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', o_bounds):
 		o_bounds = str(input("Error: invalid setting for o_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
-		if not 'o_bounds' in globals():
+		if not o_bounds:
 			o_bounds = "c(-50, 50)"
 	
 	if not 's_bounds' in globals():
@@ -335,7 +340,7 @@ if not args.nofix:
 
 	while not re.match('^c\s*\(\s*-?[0-9]*(\.[0-9]+)?\s*,\s*-?[0-9]*(\.[0-9]+)?\s*\)\s*$', s_bounds):
 		s_bounds = str(input("Error: invalid setting for s_bounds. Please enter a 1 x 2 matrix of numbers in the format 'c(x, y)': "))
-		if not 's_bounds' in globals():
+		if not s_bounds:
 			s_bounds = "c(1, 20)"
 
 	def strip_quotes(input):
@@ -349,7 +354,7 @@ if not args.nofix:
 		to_align_list = [strip_quotes(str(Path(asc_files_dir) / f)) for f in os.listdir(asc_files_dir) if not re.sub(r'\.asc', '_fa.asc', f) in os.listdir(fa_output_dir) and '.asc' in f and not '_fa.asc' in f]
 		if to_align_list:
 			asc_files_dir = 'c("' + '", "'.join(to_align_list) + '")'
-			start_pts_regex = re.compile('^rbind\s*\(\s*(\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
+			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
 			if 'script_loc' and 'start_pts' in globals() and os.path.isfile(script_loc):
 				with open(script_loc, "r") as file:
 					script = file.read()
@@ -380,7 +385,7 @@ if not args.nofix:
 			asc_files_dir = ""
 	else:
 		if [f for f in os.listdir(Path(asc_files_dir)) if '.asc' in f and not '_fa.asc' in f]:
-			start_pts_regex = re.compile('^rbind\s*\([ ]*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
+			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
 			if 'script_loc' and 'start_pts' in globals() and os.path.isfile(script_loc):
 				with open(script_loc, "r") as file:
 					script = file.read()
