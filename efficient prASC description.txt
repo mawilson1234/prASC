@@ -20,7 +20,10 @@ in the parameters file.
 This all assumes that you have not modified your configuration settings between 
 runs; if you modify configuration settings related to column names in your 
 results files between runs, prASC will not be able to detect which files have 
-already been processed, and will reprocess everything.
+already been processed, and will reprocess everything. It also assume that your
+columns occur in the default order, and that all columns output by default are
+present. If you have deleted or rearranged data in your CSV and saved over
+the original file output by prASC, this may not work.
 
 In order to accommodate users who may wish to reprocess all sentences and 
 questions, this version of prASC adds two new options: '--resentences' ('-rs')
