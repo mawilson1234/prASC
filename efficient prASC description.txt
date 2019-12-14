@@ -5,7 +5,8 @@
  for questions, and 'results_combined.csv' for the CSV combining sentences and 
  questions), and these files must be in the user-specified output directory. 
  If nocombine is set, the script looks for existing results info in the uncombined 
- results files; if it is not set, it looks for info in results_combined.csv.
+ results files; if it is not set, it looks for info in results_combined.csv. You will
+ also need to set '--overwrite' ('-o') in order for this to work.
 
 It uses this info to construct a list of filenames already in the results files, 
 and removes files with those names from the list of files to process for sentences/questions. 
