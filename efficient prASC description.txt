@@ -11,3 +11,8 @@ yet processed should not have the same name as those in the existing results fil
 properly processed. In addition, it will ignore directory information when comparing files in the directory
 that is to be processed with those specified in the results file, and only compare file names. Take this into
 account when setting your directories in the parameters file.
+
+In order to accommodate users who may wish to reprocess all sentences and questions, this version of prASC
+adds two new options: '--resentences' ('-rs') and '--requestions' ('-rq'), which will reprocess all results
+for sentences and questions respectively. Note that if you have deleted ASC files which are represented in the 
+results files from the directory to be processed, this will result in that information being lost.
