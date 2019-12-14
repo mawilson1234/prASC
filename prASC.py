@@ -377,7 +377,6 @@ if not args.nofix:
 			while not start_pts_regex.match(start_pts):
 				start_pts = str(input("Error: start_pts not formatted correctly. start_pts should be of the form 'rbind(c(x, y) [, c(x, y), ...])'. Please enter a valid start_pts matriX: "))
 		else:
-			#old_asc_files_dir = asc_files_dir
 			asc_files_dir = ""
 	else:
 		if [f for f in os.listdir(Path(asc_files_dir)) if '.asc' in f and not '_fa.asc' in f]:
