@@ -528,7 +528,7 @@ if not args.noquestions:
 				print(file)
 				
 			search_strings = [strip_quotes(start_flag), 'QUESTION_ANSWER', 'TRIAL_RESULT']
-			temp_quest_file = open('temp_quest_file','w+')
+			temp_quest_file = open(output_dir / 'temp_quest_file','w+')
 			for line in filename:
 				for entry in search_strings:
 					if entry in line:
@@ -581,7 +581,7 @@ if not args.noquestions:
 			summary_file.write('\n')
 
 		try:
-			os.remove('temp_quest_file')
+			os.remove(output_dir / 'temp_quest_file')
 		except:
 			print("Unable to delete temp_quest_file. Continuing...")
 
