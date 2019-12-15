@@ -609,14 +609,14 @@ if not args.nocombine:
 
 		print("Combining results...")
 		# Check if the columns we need to conjoin the output are included in the output, and if not, exit
-		is_item_id_included = re.findall(r'"region_output"[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false"  or len(re.findall(r'"region_output[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
+		is_item_id_included = re.findall(r'"region_output"[\s\S]*?"' + item_id_col_name + r'"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false"  or len(re.findall(r'"region_output[\s\S]*?"' + item_id_col_name + r'"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 		if not is_item_id_included:
 			print("item_id not included in results. Cannot combine results.")
 			sys.exit(1)
 
-		is_filename_included = re.findall(r'"region_output"[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
+		is_filename_included = re.findall(r'"region_output"[\s\S]*?"' + filename_col_name + r'"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"' + filename_col_name + r'"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 
-		is_item_condition_included = re.findall(r'"region_output[\s\S]*?"item_condition"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"item_condition"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
+		is_item_condition_included = re.findall(r'"region_output[\s\S]*?"' + item_condition_col_name + r'"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"' + item_condition_col_name + r'"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 
 		# Set variables corresponding to whether any results were combined to false
 		combined_s_subj_quest = False
