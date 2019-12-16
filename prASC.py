@@ -351,6 +351,7 @@ if not args.nofix:
 
 	if not args.refix:
 		# Get only the files that we haven't got _fa.asc variants of
+		# Mark this to make better later; this probably isn't the best way to do it
 		to_align_list = [strip_quotes(str(Path(asc_files_dir) / f)) for f in os.listdir(asc_files_dir) if not re.sub(r'\.asc', '_fa.asc', f) in os.listdir(fa_output_dir) and '.asc' in f and not '_fa.asc' in f]
 		if to_align_list:
 			asc_files_dir = 'c("' + '", "'.join(to_align_list) + '")'
@@ -489,11 +490,57 @@ if not args.nosentences:
 
 # Get correct names for columns to use when joining results from the settings in the config file
 if not args.noquestions or not args.nocombine:
+	import json
+
 	with open(Path(config_json_loc), "r") as file:
-		config_txt = file.read()
-		filename_col_name = re.findall(r'"trial_output"[\s\S]*?"filename"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
-		item_id_col_name = re.findall(r'"trial_output"[\s\S]*?"item_id"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
-		item_condition_col_name = re.findall(r'"trial_output"[\s\S]*?"item_condition"[\s\S]*?"header":\s*"(.*)"', config_txt)[0]
+		config = json.load(file)
+
+		# Filter to the trial output that's included according to the config file. We need to do both since trial_output headers override region_output headers
+		trial_output = []
+		if 'trial_output' in config:
+			trial_output = config['trial_output']
+
+		trial_output_excluded = [field for field in trial_output if 'exclude' in trial_output[field] and trial_output[field]['exclude'] == True]
+		trial_output_included = trial_output
+
+		for field in trial_output_excluded:
+			del trial_output_included[field]
+
+		# Filter to the region output that's included according to the config file
+		region_output = []
+		if 'region_output' in config:
+			region_output = config['region_output']
+
+		region_output_excluded = [field for field in region_output if 'exclude' in region_output[field] and region_output[field]['exclude'] == True]
+		region_output_included = region_output
+
+		for field in region_output_excluded:
+			del region_output_included[field]
+
+		if 'filename' in trial_output_included:
+			filename_col_name = trial_output_included['filename']['header']
+		elif 'filename' in region_output_included:
+			filename_col_name = region_output_included['filename']['header']
+		else:
+			filename_col_name = 'filename'
+
+		if 'item_id' in trial_output_included:
+			item_id_col_name = trial_output_included['item_id']['header']
+		elif 'item_id' in region_output_included:
+			item_id_col_name = region_output_included['item_id']['header']
+		else:
+			item_id_col_name = 'item_id'
+
+		if 'item_condition' in trial_output_included:
+			item_condition_col_name = trial_output_included['item_condition']['header']
+		elif 'item_condition' in region_output_included:
+			item_condition_col_name = region_output_included['item_condition_col_name']['header']
+		else:
+			item_condition_col_name = 'item_condition'
+
+		is_item_id_included = 'item_id' in trial_output_included or 'item_id' in region_output_included
+		is_filename_included = 'filename' in trial_output_included or 'filename' in region_output_included
+		is_item_condition_included = 'item_condition' in trial_output_included or 'item_condition' in region_output_included
 
 # Questions
 if not args.noquestions:
@@ -609,14 +656,9 @@ if not args.nocombine:
 
 		print("Combining results...")
 		# Check if the columns we need to conjoin the output are included in the output, and if not, exit
-		is_item_id_included = re.findall(r'"region_output"[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false"  or len(re.findall(r'"region_output[\s\S]*?"item_id"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 		if not is_item_id_included:
 			print("item_id not included in results. Cannot combine results.")
 			sys.exit(1)
-
-		is_filename_included = re.findall(r'"region_output"[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"filename"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
-
-		is_item_condition_included = re.findall(r'"region_output[\s\S]*?"item_condition"[\s\S]*?"exclude":\s*"(.*)"', config_txt) == "false" or len(re.findall(r'"region_output[\s\S]*?"item_condition"[\s\S]*?"exclude":\s*"(.*)"', config_txt)) == 0
 
 		# Set variables corresponding to whether any results were combined to false
 		combined_s_subj_quest = False
