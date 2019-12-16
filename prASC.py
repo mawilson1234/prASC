@@ -107,6 +107,11 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 
 		output_dir = Path(output_dir)
 
+	# If we're combining results, the results file already exists, and we're not overwriting, exit
+	if not args.nocombine and os.path.isfile(output_dir / 'results_combined.csv') and not args.overwrite:
+		print("Error: results_combined.csv already exists in " + str(output_dir) + ". Use '--overwrite' ('-o') to overwrite existing results_combined.csv files. Exiting.")
+		sys.exit(1)
+
 	if not args.nosentences or not args.noquestions:
 		if not 'config_json_loc' in globals():
 			config_json_loc = current_dir / "config.json"
@@ -203,6 +208,17 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 
 	if not args.nosentences or not args.nocombine:
 		csv_loc = Path(output_dir) / "results.csv"
+		if os.path.isfile(csv_loc) and not args.overwrite:
+			print("Error: results.csv already exists in " + str(output_dir) + ". Use '--overwrite' ('-o') to overwrite existing results files. Exiting.")
+			sys.exit(1)
+
+	if not args.noquestions or not args.nocombine:
+		# Set up the question file locations
+		subj_quest_file_name = output_dir / 'subject_question_info.txt'
+		summary_file_name = output_dir / 'question_summary.txt'
+		if (os.path.isfile(subj_quest_file_name) or os.path.isfile(summary_file_name)) and not args.overwrite:
+			print("Error: question results file(s) already exist in " + output_dir + ". Use '--overwrite' ('-o') to overwrite existing results files. Exiting.")
+			sys.exit(1)
 
 # Fix align parameters to use for function call, defaults are as in Cohen (2013), except for file_plots
 if not args.nofix:
@@ -544,237 +560,222 @@ if not args.noquestions or not args.nocombine:
 
 # Questions
 if not args.noquestions:
-	subj_quest_file_name = output_dir / 'subject_question_info.txt'
-	summary_file_name = output_dir / 'question_summary.txt'
+	print("Creating question summaries...")
 
-	if (os.path.isfile(Path(subj_quest_file_name)) or os.path.isfile(Path(summary_file_name))) and not args.overwrite:
-		if os.path.isfile(Path(subj_quest_file_name)) and os.path.isfile(Path(summary_file_name)):
-			print("Error: " + subj_quest_file_name.name + " and " + summary_file_name.name + " already exist in " + str(output_dir) + ". Use '--overwrite' ('-o') to overwrite existing files. Not creating question summaries.")
-		elif os.path.isfile(Path(subj_quest_file_name)):
-			print("Error: " + subj_quest_file_name.name + " already exists in " + str(output_dir) + ". Use '--overwrite' ('-o') to overwrite existing files. Not creating question summaries.")
-		elif os.path.isfile(Path(summary_file_name)):
-			print("Error: " + summary_file_name.name + " already exists in " + str(output_dir) + ". Use '--overwrite' (-'o') to overwrite existing files. Not creating question summaries.")
-	else:
-		print("Creating question summaries...")
+	subj_sum = []
+	subj_quest_file = open(subj_quest_file_name, 'w')
+	subj_quest_file.write(filename_col_name + " question_type " + item_id_col_name + " correct_answer response was_response_correct response_RT\n")
+	summary_file = open(summary_file_name,'w')
+	summary_file.write(filename_col_name + ' s_number_questions s_num_correct_answers s_total_prop_correct\n')
 
-		subj_sum = []
-		subj_quest_file = open(subj_quest_file_name, 'w')
-		subj_quest_file.write(filename_col_name + " question_type " + item_id_col_name + " correct_answer response was_response_correct response_RT\n")
-		summary_file = open(summary_file_name,'w')
-		summary_file.write(filename_col_name + ' s_number_questions s_num_correct_answers s_total_prop_correct\n')
-
-		for file in file_list:
-
-			try:
-				filename = open(file, 'r')
-			except:
-				print("File %s could not be found." %file)
-				sys.exit(1)
-
-			if args.verbose:
-				print(file)
-				
-			search_strings = [strip_quotes(start_flag), 'QUESTION_ANSWER', 'TRIAL_RESULT']
-			temp_quest_file = open(output_dir / 'temp_quest_file','w+')
-			for line in filename:
-				for entry in search_strings:
-					if entry in line:
-						temp_quest_file.write(line)
-						
-			temp_quest_file.seek(0,0)
-			qcount = 0		# count of questions
-			acount = 0		# count of accurate answers
-			for line in temp_quest_file:
-				if search_strings[0] in line:
-					correct = 'none'
-				
-					fields = line.split()
-					start_time = int(fields[1])
-					trialid = fields[3]
-					first_split = trialid.split('I')#split into the condition, and then item and dependent
-					condition = first_split[0]
-					cond_num = condition[1:] #strip off the letter from the beginning of condition
-					second_split = first_split[1].split('D')#split into item and dependent
-					item_num = second_split[0]
-				
-				elif search_strings[1] in line:
-					fields = line.split()
-					correct = fields[3]
-					
-				else:
-					fields = line.split()
-					end_time = int(fields[1])
-					answer = fields[3]
-					
-					#write out line, if the item had a question
-					if correct != 'none':
-						qcount = qcount + 1
-						was_response_correct = "FALSE"
-						if correct == answer:
-							was_response_correct = "TRUE"
-							acount = acount + 1
-						output_line = ['"' + file + '"', cond_num, item_num, correct, answer, was_response_correct, str(end_time - start_time)]
-						subj_quest_file.write(' '.join(output_line))
-						subj_quest_file.write('\n')
-
-			temp_quest_file.close()
-
-			if args.verbose:
-				print(file,qcount,acount,float(acount/qcount))
-
-			subj_sum = ['"' + file + '"', str(qcount), str(acount),str(float(acount/qcount))]
-			subj_sum_join = ' '.join(subj_sum)
-			summary_file.write(subj_sum_join)
-			summary_file.write('\n')
-
+	for file in file_list:
 		try:
-			os.remove(output_dir / 'temp_quest_file')
+			filename = open(file, 'r')
 		except:
-			print("Unable to delete temp_quest_file. Continuing...")
+			print("File %s could not be found." %file)
+			sys.exit(1)
 
-		subj_quest_file.close()
-		summary_file.close()
+		if args.verbose:
+			print(file)
+			
+		search_strings = [strip_quotes(start_flag), 'QUESTION_ANSWER', 'TRIAL_RESULT']
+		temp_quest_file = open(output_dir / 'temp_quest_file','w+')
+		for line in filename:
+			for entry in search_strings:
+				if entry in line:
+					temp_quest_file.write(line)
+						
+		temp_quest_file.seek(0,0)
+		qcount = 0		# count of questions
+		acount = 0		# count of accurate answers
+		for line in temp_quest_file:
+			if search_strings[0] in line:
+				correct = 'none'
+				
+				fields = line.split()
+				start_time = int(fields[1])
+				trialid = fields[3]
+				first_split = trialid.split('I')#split into the condition, and then item and dependent
+				condition = first_split[0]
+				cond_num = condition[1:] #strip off the letter from the beginning of condition
+				second_split = first_split[1].split('D')#split into item and dependent
+				item_num = second_split[0]
+				
+			elif search_strings[1] in line:
+				fields = line.split()
+				correct = fields[3]
+					
+			else:
+				fields = line.split()
+				end_time = int(fields[1])
+				answer = fields[3]
+					
+				#write out line, if the item had a question
+				if correct != 'none':
+					qcount = qcount + 1
+					was_response_correct = "FALSE"
+					if correct == answer:
+						was_response_correct = "TRUE"
+						acount = acount + 1
+					output_line = ['"' + file + '"', cond_num, item_num, correct, answer, was_response_correct, str(end_time - start_time)]
+					subj_quest_file.write(' '.join(output_line))
+					subj_quest_file.write('\n')
+
+		temp_quest_file.close()
+
+		if args.verbose:
+			print(file,qcount,acount,float(acount/qcount))
+
+		subj_sum = ['"' + file + '"', str(qcount), str(acount),str(float(acount/qcount))]
+		subj_sum_join = ' '.join(subj_sum)
+		summary_file.write(subj_sum_join)
+		summary_file.write('\n')
+
+	try:
+		os.remove(output_dir / 'temp_quest_file')
+	except:
+		print("Unable to delete temp_quest_file. Continuing...")
+
+	subj_quest_file.close()
+	summary_file.close()
 
 # Combine
 if not args.nocombine:
-	if os.path.isfile(Path(output_dir) / 'results_combined.csv') and not args.overwrite:
-		print("Error: results-combined.csv already exists in " +  str(output_dir) + ". Use '--overwrite' ('-o') to overwrite existing results-combined.csv files. Not combining results.")
-	else:
-		if args.noquestions and not args.nosentences:
+	if args.noquestions and not args.nosentences:
 			print("Combining pre-existing question files. Assuming column names as specified in " + config_json_loc.name + ", and filenames 'subj_question_info.txt', 'question_summary.txt'. Assuming files are located in " + str(output_dir) + ".")
-		elif args.nosentences and not args.noquestions:
-			print("Combining pre-existing results. Assuming column names as specified in " + config_json_loc.name + ", and filename 'results.csv'. Assuming results file is located in " + str(output_dir) + '.')
-		elif args.nosentences and args.noquestions:
-			print("Combining pre-existing results. Assuming column names as specified in " + config_json_loc.name + ", and filenames 'subj_question_info.txt', 'question_summary.txt', 'results.csv'. Assuming files are located in " + str(output_dir) + '.')
+	elif args.nosentences and not args.noquestions:
+		print("Combining pre-existing results. Assuming column names as specified in " + config_json_loc.name + ", and filename 'results.csv'. Assuming results file is located in " + str(output_dir) + '.')
+	elif args.nosentences and args.noquestions:
+		print("Combining pre-existing results. Assuming column names as specified in " + config_json_loc.name + ", and filenames 'subj_question_info.txt', 'question_summary.txt', 'results.csv'. Assuming files are located in " + str(output_dir) + '.')
 
 
-		if (not os.path.isfile(subj_quest_file_name) and 
-			not os.path.isfile(summary_file_name) and 
-			not os.path.isfile(csv_loc)):
-			print("No results found to combine. Exiting...")
-			sys.exit(1)
+	if (not os.path.isfile(subj_quest_file_name) and 
+		not os.path.isfile(summary_file_name) and 
+		not os.path.isfile(csv_loc)):
+		print("No results found to combine. Exiting...")
+		sys.exit(1)
 
-		print("Combining results...")
-		# Check if the columns we need to conjoin the output are included in the output, and if not, exit
-		if not is_item_id_included:
-			print("item_id not included in results. Cannot combine results.")
-			sys.exit(1)
+	print("Combining results...")
+	# Check if the columns we need to conjoin the output are included in the output, and if not, exit
+	if not is_item_id_included:
+		print("item_id not included in results. Cannot combine results.")
+		sys.exit(1)
 
-		# Set variables corresponding to whether any results were combined to false
-		combined_s_subj_quest = False
-		combined_s_questsum = False
-		combined_s_stimuli = False
-		combined_q_stimuli = False
-		combined_q_questsum = False
+	# Set variables corresponding to whether any results were combined to false
+	combined_s_subj_quest = False
+	combined_s_questsum = False
+	combined_s_stimuli = False
+	combined_q_stimuli = False
+	combined_q_questsum = False
 
-		# If we have sentences
-		if os.path.isfile(csv_loc):
-			results = pandas.read_csv(csv_loc, encoding = file_encoding)
+	# If we have sentences
+	if os.path.isfile(csv_loc):
+		results = pandas.read_csv(csv_loc, encoding = file_encoding)
 
-			# If we have questions and we have the right column to join them on
-			if os.path.isfile(subj_quest_file_name) and os.path.isfile(summary_file_name) and is_filename_included:
-				questions = pandas.read_csv(subj_quest_file_name, sep = " ", encoding = file_encoding)
-				questions = questions[questions['question_type'] != 1]
-				subj_questions = pandas.read_csv(summary_file_name, sep = " ", encoding = file_encoding)
-				questions = pandas.merge(questions, subj_questions, how = 'right')
-				results = pandas.merge(results, questions, how = 'left')
-				combined_s_subj_quest = True
-				combined_s_questsum = True
-			elif os.path.isfile(summary_file_name) and is_filename_included:
-				questions = pandas.read_csv(summary_file_name, sep = " ", encoding = file_encoding)
-				results = pandas.merge(results, questions, how = 'right')
-				combined_s_questsum = True
-			elif not is_filename_included:
-				print("filename not included in results. Cannot combine results and questions.")
-			# If we have stimuli and the right column to join them on (add checks for blank values or incorrect values)
-			if os.path.isfile(stimuli_loc) and is_item_condition_included:
-				stimuli = pandas.read_csv(stimuli_loc, encoding = file_encoding)
+		# If we have questions and we have the right column to join them on
+		if os.path.isfile(subj_quest_file_name) and os.path.isfile(summary_file_name) and is_filename_included:
+			questions = pandas.read_csv(subj_quest_file_name, sep = " ", encoding = file_encoding)
+			questions = questions[questions['question_type'] != 1]
+			subj_questions = pandas.read_csv(summary_file_name, sep = " ", encoding = file_encoding)
+			questions = pandas.merge(questions, subj_questions, how = 'right')
+			results = pandas.merge(results, questions, how = 'left')
+			combined_s_subj_quest = True
+			combined_s_questsum = True
+		elif os.path.isfile(summary_file_name) and is_filename_included:
+			questions = pandas.read_csv(summary_file_name, sep = " ", encoding = file_encoding)
+			results = pandas.merge(results, questions, how = 'right')
+			combined_s_questsum = True
+		elif not is_filename_included:
+			print("filename not included in results. Cannot combine results and questions.")
+		# If we have stimuli and the right column to join them on (add checks for blank values or incorrect values)
+		if os.path.isfile(stimuli_loc) and is_item_condition_included:
+			stimuli = pandas.read_csv(stimuli_loc, encoding = file_encoding)
 
-				# If the columns exist, check whether to rename them
-				if not 'item_id' in stimuli.columns and not item_id_col_name in stimuli.columns:
-					print("item_id not included in stimuli. Cannot combine results and stimuli.")
-				elif not item_id_col_name in stimuli.columns:
-					stimuli.rename(columns = {'item_id': item_id_col_name }, inplace = True)
+			# If the columns exist, check whether to rename them
+			if not 'item_id' in stimuli.columns and not item_id_col_name in stimuli.columns:
+				print("item_id not included in stimuli. Cannot combine results and stimuli.")
+			elif not item_id_col_name in stimuli.columns:
+				stimuli.rename(columns = {'item_id': item_id_col_name }, inplace = True)
 
-				if not 'item_condition' in stimuli.columns and not item_condition_col_name in stimuli.columns:
-					print("item_condition not included in stimuli. Cannot combine results and stimuli.")
-				elif not item_condition_col_name in stimuli.columns:
-					stimuli.rename(columns = {'item_condition': item_condition_col_name}, inplace = True)
+			if not 'item_condition' in stimuli.columns and not item_condition_col_name in stimuli.columns:
+				print("item_condition not included in stimuli. Cannot combine results and stimuli.")
+			elif not item_condition_col_name in stimuli.columns:
+				stimuli.rename(columns = {'item_condition': item_condition_col_name}, inplace = True)
 
-				# Check that the columns needed exist and are formatted correctly
-				if item_id_col_name in stimuli.columns and item_condition_col_name in stimuli.columns:
-					if (stimuli[item_id_col_name].isnull().any() or 
-						stimuli[item_id_col_name].apply(lambda x: bool(re.match('^$', str(x)))).any() or
-						not stimuli[item_id_col_name].apply(lambda x: bool(re.match(r'^[0-9]*$', str(x)))).all() or
-						not set(x for x in set(results[item_id_col_name].unique().tolist()) if pandas.notna(x)).issubset(stimuli[item_id_col_name].unique().tolist())):
-						print("Error: stimuli file has improperly specified item ids. Not combining stimuli with results.")
-					elif (stimuli[item_condition_col_name].isnull().any() or
-						stimuli[item_condition_col_name].apply(lambda x: bool(re.match('^$', str(x)))).any() or 
-						not stimuli[item_condition_col_name].apply(lambda x: bool(re.match(r'^[0-9]*$', str(x)))).all() or
-						not set(x for x in set(results[item_condition_col_name].unique().tolist()) if pandas.notna(x)).issubset(stimuli[item_condition_col_name].unique().tolist())):
-						print("Error: stimuli file has improperly specified item conditions. Not combining stimuli with results.")
-					else:
-						results = pandas.merge(results, stimuli, how = 'left')
-						combined_s_stimuli = True
+			# Check that the columns needed exist and are formatted correctly
+			if item_id_col_name in stimuli.columns and item_condition_col_name in stimuli.columns:
+				if (stimuli[item_id_col_name].isnull().any() or 
+					stimuli[item_id_col_name].apply(lambda x: bool(re.match('^$', str(x)))).any() or
+					not stimuli[item_id_col_name].apply(lambda x: bool(re.match(r'^[0-9]*$', str(x)))).all() or
+					not set(x for x in set(results[item_id_col_name].unique().tolist()) if pandas.notna(x)).issubset(stimuli[item_id_col_name].unique().tolist())):
+					print("Error: stimuli file has improperly specified item ids. Not combining stimuli with results.")
+				elif (stimuli[item_condition_col_name].isnull().any() or
+					stimuli[item_condition_col_name].apply(lambda x: bool(re.match('^$', str(x)))).any() or 
+					not stimuli[item_condition_col_name].apply(lambda x: bool(re.match(r'^[0-9]*$', str(x)))).all() or
+					not set(x for x in set(results[item_condition_col_name].unique().tolist()) if pandas.notna(x)).issubset(stimuli[item_condition_col_name].unique().tolist())):
+					print("Error: stimuli file has improperly specified item conditions. Not combining stimuli with results.")
+				else:
+					results = pandas.merge(results, stimuli, how = 'left')
+					combined_s_stimuli = True
 
-			elif not is_item_condition_included:
-				print("item_condition not included in results. Cannot combine results with stimuli.")
-		# If we have questions (but no sentences)		
-		elif os.path.isfile(subj_quest_file_name):
-			results = pandas.read_csv(subj_quest_file_name, sep = " ", encoding = file_encoding)
-			results = results[results['question_type'] != 1]
+		elif not is_item_condition_included:
+			print("item_condition not included in results. Cannot combine results with stimuli.")
+	# If we have questions (but no sentences)		
+	elif os.path.isfile(subj_quest_file_name):
+		results = pandas.read_csv(subj_quest_file_name, sep = " ", encoding = file_encoding)
+		results = results[results['question_type'] != 1]
 
-			if os.path.isfile(summary_file_name):
-				subj_questions = pandas.read_csv(summary_file_name, sep = " ", encoding = file_encoding)
-				results = pandas.merge(results, subj_questions, how = 'right')
-				combined_q_questsum = True
+		if os.path.isfile(summary_file_name):
+			subj_questions = pandas.read_csv(summary_file_name, sep = " ", encoding = file_encoding)
+			results = pandas.merge(results, subj_questions, how = 'right')
+			combined_q_questsum = True
 
-			# If we have stimuli (add checks for blank values or incorrect values)
-			if os.path.isfile(stimuli_loc):
-				stimuli = pandas.read_csv(stimuli_loc, encoding = file_encoding)
+		# If we have stimuli (add checks for blank values or incorrect values)
+		if os.path.isfile(stimuli_loc):
+			stimuli = pandas.read_csv(stimuli_loc, encoding = file_encoding)
 
-				# If the columns exist, check whether to rename them
-				if not 'item_id' in stimuli.columns and not item_id_col_name in stimuli.columns:
-					print('item_id not included in stimuli. Cannot combine results and stimuli.')
-				elif not item_id_col_name in stimuli.columns:
-					stimuli.rename(columns = {'item_id': item_id_col_name }, inplace = True)
+			# If the columns exist, check whether to rename them
+			if not 'item_id' in stimuli.columns and not item_id_col_name in stimuli.columns:
+				print('item_id not included in stimuli. Cannot combine results and stimuli.')
+			elif not item_id_col_name in stimuli.columns:
+				stimuli.rename(columns = {'item_id': item_id_col_name }, inplace = True)
 
-				if item_id_col_name in stimuli.columns:
-					if (stimuli[item_id_col_name].isnull().any() or 
-						stimuli[item_id_col_name].apply(lambda x: bool(re.match('^$', str(x)))).any() or
-						not stimuli[item_id_col_name].apply(lambda x: bool(re.match(r'^[0-9]*$', str(x)))).all() or
-						not set(x for x in set(results[item_id_col_name].unique().tolist()) if pandas.notna(x)).issubset(stimuli[item_id_col_name].unique().tolist())):
-						print("Error: stimuli file has improperly specified item ids. Not combining stimuli with results.")
-					else:
-						results = pandas.merge(results, stimuli, how = 'left')
-						combined_q_stimuli = True
+			if item_id_col_name in stimuli.columns:
+				if (stimuli[item_id_col_name].isnull().any() or 
+					stimuli[item_id_col_name].apply(lambda x: bool(re.match('^$', str(x)))).any() or
+					not stimuli[item_id_col_name].apply(lambda x: bool(re.match(r'^[0-9]*$', str(x)))).all() or
+					not set(x for x in set(results[item_id_col_name].unique().tolist()) if pandas.notna(x)).issubset(stimuli[item_id_col_name].unique().tolist())):
+					print("Error: stimuli file has improperly specified item ids. Not combining stimuli with results.")
+				else:
+					results = pandas.merge(results, stimuli, how = 'left')
+					combined_q_stimuli = True
 
-		# If any combining happened
-		if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli or combined_q_stimuli or combined_q_questsum:
-			# Write out the combined results
-			print("Writing out combined output...")
-			results.to_csv(Path(output_dir) / 'results_combined.csv', index = False, na_rep = 'NA')
-			# Then delete the appropriate files if we're not keeping them
-			if not args.keepall:
-				# If we combined the sentences into the results, delete them
-				if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli:
-					try:
-						os.remove(csv_loc)
-					except:
-						print("Unable to delete non-combined results file.")
+	# If any combining happened
+	if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli or combined_q_stimuli or combined_q_questsum:
+		# Write out the combined results
+		print("Writing out combined output...")
+		results.to_csv(Path(output_dir) / 'results_combined.csv', index = False, na_rep = 'NA')
+		# Then delete the appropriate files if we're not keeping them
+		if not args.keepall:
+			# If we combined the sentences into the results, delete them
+			if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli:
+				try:
+					os.remove(csv_loc)
+				except:
+					print("Unable to delete non-combined results file.")
 
-				# If we combined the questions into the results, delete them
-				if combined_s_subj_quest or combined_q_stimuli:
-					try:
-						os.remove(subj_quest_file_name)
-					except:
-						print("Unable to delete non-combined questions file.")
+			# If we combined the questions into the results, delete them
+			if combined_s_subj_quest or combined_q_stimuli:
+				try:
+					os.remove(subj_quest_file_name)
+				except:
+					print("Unable to delete non-combined questions file.")
 
-				if combined_s_questsum or combined_q_questsum:
-					try:
-						os.remove(summary_file_name)
-					except:
-						print("Unable to delete non-combined questions summary file.")
+			if combined_s_questsum or combined_q_questsum:
+				try:
+					os.remove(summary_file_name)
+				except:
+					print("Unable to delete non-combined questions summary file.")
 
 print("Completed successfully!")
 sys.exit(0)
