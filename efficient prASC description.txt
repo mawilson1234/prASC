@@ -23,10 +23,18 @@ already been processed, and will reprocess everything. If you have deleted or
 renamed columns in your CSV and saved over the original file output by prASC, 
 this may not work.
 
+If you don't have any files to process, but just want to generate the separate
+results files from the results CSV, just run the script using the '--keepall'
+('-k') option. If you also want to remove the combined results file while doing
+this, set the '--nocombine' ('-nc') option as well.
+
 In order to accommodate users who may wish to reprocess all sentences and 
 questions, this version of prASC adds two new options: '--resentences' ('-rs')
 and '--requestions' ('-rq'), which will reprocess all results for sentences and
 questions respectively. It also updates the short version of '--refix' to '-rf',
 to match the format of the new commands. If you have deleted ASC files from the
-directory to be processed, it should also handle that correctly, and only
-add new information to the results from ASC files that haven't yet been processed.
+directory to be processed, it is supposed to handle that correctly, and add information
+that has not yet been processed while retaining information that has. (Note that if you
+have deleted all files from the raw ASC files directory, prASC will show an error
+that it cannot find ASC files. In this case, you should set asc_files_dir to the
+directory of the processed ASC files, and set the --nofix ('-nf') option.)
