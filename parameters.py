@@ -37,7 +37,7 @@
 #asc_files_dir = "ASC"
 
 #fa_output_dir = "ASC/Fix Aligned"
-#script_loc = "Resources"
+#script_loc = "*.script"
 #fix_align_loc = "fix_align_v0p92"
 
 #config_json_loc = "config"
