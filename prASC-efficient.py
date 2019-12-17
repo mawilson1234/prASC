@@ -504,7 +504,7 @@ if not args.nofix:
 			print("Unable to delete fix_align_tmp file. Make sure to delete manually before running this script again.")
 	else:
 		# There aren't any asc files to process, so print a message to that effect
-		print("All ASC files have existing fix aligned versions. Skipping fix_align. Use '--refix' ('-r') to re-fix align ASCs.")
+		print("All ASC files have existing fix aligned versions. Skipping fix_align. Use '--refix' ('-rf') to re-fix align ASCs.")
 	
 	file_list = os.listdir(fa_output_dir)
 	file_list = [str(Path(fa_output_dir) / f) for f in file_list if '_fa.asc' in f]
