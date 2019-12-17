@@ -660,14 +660,14 @@ if not args.nosentences:
 		print("All sentences have already been processed with SideEye. Skipping SideEye. Use '--resentences' ('-rs') to reprocess sentences with SideEye.")
 
 	# If the sentences file list isn't the full file list and the partial results file already exists, join the existing results to the results we just put out. Checking whether the file exists is in case we didn't use overwrite and skipped writing it out
-	if s_already_processed and not all(file in s_already_processed for file in [undir.sub('\\4', f) for f in file_list]) and os.path.isfile(csv_loc):
+	if not args.resentences and s_already_processed and not all(file in s_already_processed for file in [undir.sub('\\4', f) for f in file_list]) and os.path.isfile(csv_loc):
 		new_results = pandas.read_csv(csv_loc, encoding = file_encoding)
 		#os.remove(csv_loc)
 		new_results = pandas.DataFrame(new_results)
 		added_results = s_existing_results.append(new_results, sort = False)
 		added_results.to_csv(csv_loc, index = False, na_rep = 'NA')
 	# If we're keeping all the intermediate results, even if we didn't process anything, we can still regenerate the intermediate file
-	elif not s_existing_results.empty and args.keepall:
+	elif not args.resentences and not s_existing_results.empty and args.keepall:
 		s_existing_results.to_csv(csv_loc, index = False, na_rep = 'NA')
 
 # Questions
@@ -689,7 +689,7 @@ if not args.noquestions:
 		q_existing_results = pandas.DataFrame(columns = [''])
 
 		# This is to store the list of already processed subjects
-		q_already_processed = ['']
+		q_already_processed = []
 
 		# If both questions files already exist, pull from the one with the least number of subjects
 		try:
@@ -812,7 +812,7 @@ if not args.noquestions:
 		print("All questions have already been processed. Skipping questions. Use '--requestions' ('-rq') to reprocess questions.")
 
 	# If we only processed a subset of the questions. Check whether the file exists in case we skipped writing it due to overwrite not be set
-	if q_already_processed and not all(file in q_already_processed for file in [undir.sub('\\4', f) for f in file_list]) and os.path.isfile(subj_quest_file_name) and os.path.isfile(summary_file_name):
+	if not args.requestions and q_already_processed and not all(file in q_already_processed for file in [undir.sub('\\4', f) for f in file_list]) and os.path.isfile(subj_quest_file_name) and os.path.isfile(summary_file_name):
 		# Read in the new results to combine
 		new_subj_quest_results = pandas.read_csv(subj_quest_file_name, encoding = file_encoding, sep = " ")
 		new_subj_quest_results = pandas.DataFrame(new_subj_quest_results)
@@ -839,7 +839,7 @@ if not args.noquestions:
 			existing_summary_file = q_existing_results[[filename_col_name, 's_number_questions', 's_num_correct_answers', 's_total_prop_correct']].drop_duplicates().reset_index(drop = True)
 			added_question_summary_results = existing_summary_file.append(new_question_summary_results, sort = False)
 			added_question_summary_results.to_csv(summary_file_name, index = False, sep = ' ', mode = 'w+', na_rep = "NA")
-	elif not q_existing_results.empty and args.keepall:
+	elif not args.requestions and not q_existing_results.empty and args.keepall:
 		if not os.path.isfile(subj_quest_file_name):
 			existing_subj_quest = q_existing_results[[filename_col_name, 'question_type', item_id_col_name, 'correct_answer', 'response', 'was_response_correct', 'response_RT']].drop_duplicates().reset_index(drop = True)
 			existing_subj_quest.to_csv(subj_quest_file_name, index = False, sep = ' ', mode = 'w+', na_rep = "NA")
