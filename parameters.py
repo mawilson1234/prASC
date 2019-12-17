@@ -34,19 +34,19 @@
 ###### Default is %current_dir%/prASCed results. Required if doing anything other than running fix_align. ############
 ######################################################################################################################
 
-asc_files_dir = "ASC"
+#asc_files_dir = "ASC"
 
 #fa_output_dir = "ASC/Fix Aligned"
 #script_loc = "Resources"
-fix_align_loc = "fix_align_v0p92"
+#fix_align_loc = "fix_align_v0p92"
 
-config_json_loc = "config"
-sentences_txt_loc = "sentences"
+#config_json_loc = "config"
+#sentences_txt_loc = "sentences"
 
 #stimuli_loc = "Stimuli-formatted"
 #file_encoding = 'latin1'
 
-output_dir = "prASCed results"
+#output_dir = "prASCed results"
 
 ######################################################################################################################
 # The following parameters are optionally set to be passed to the fix_align call. ####################################
@@ -57,16 +57,16 @@ output_dir = "prASCed results"
 # or if the optionally provided script file doesn't include them. ####################################################
 ######################################################################################################################
 start_pts = ""
-xy_bounds = "NULL"
-keep_y_var = "FALSE"
-use_run_rule = "TRUE"
-trial_plots = "FALSE"
-save_trial_plots = "FALSE"
-summary_file = "TRUE"
-show_image = "FALSE"
-start_flag = "TRIALID"
-den_sd_cutoff = "Inf"
-den_ratio_cutoff = "1"
-k_bounds = "c(-.1, .1)"
-o_bounds = "c(-50, 50)"
-s_bounds = "c(1, 20)"
+#xy_bounds = "NULL"
+#keep_y_var = "FALSE"
+#use_run_rule = "TRUE"
+#trial_plots = "FALSE"
+#save_trial_plots = "FALSE"
+#summary_file = "TRUE"
+#show_image = "FALSE"
+#start_flag = "TRIALID"
+#den_sd_cutoff = "Inf"
+#den_ratio_cutoff = "1"
+#k_bounds = "c(-.1, .1)"
+#o_bounds = "c(-50, 50)"
+#s_bounds = "c(1, 20)"
