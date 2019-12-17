@@ -839,7 +839,7 @@ if not args.noquestions:
 			existing_summary_file = q_existing_results[[filename_col_name, 's_number_questions', 's_num_correct_answers', 's_total_prop_correct']].drop_duplicates().reset_index(drop = True)
 			added_question_summary_results = existing_summary_file.append(new_question_summary_results, sort = False)
 			added_question_summary_results.to_csv(summary_file_name, index = False, sep = ' ', mode = 'w+', na_rep = "NA")
-	elif not args.requestions and not q_existing_results.empty and args.keepall:
+	elif not args.requestions and not q_existing_results.empty:
 		if not os.path.isfile(subj_quest_file_name):
 			existing_subj_quest = q_existing_results[[filename_col_name, 'question_type', item_id_col_name, 'correct_answer', 'response', 'was_response_correct', 'response_RT']].drop_duplicates().reset_index(drop = True)
 			existing_subj_quest.to_csv(subj_quest_file_name, index = False, sep = ' ', mode = 'w+', na_rep = "NA")
