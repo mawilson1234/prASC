@@ -7,7 +7,7 @@
 import os, re, sys, subprocess, argparse
 from pathlib import Path
 
-# Define the arguments, and deal with some of their combinations
+# Define the arguments and parse them
 parser = argparse.ArgumentParser()
 parser.add_argument('filename', nargs = '?', default = Path(os.path.dirname(os.path.realpath(__file__))) / "parameters.py", 
 	help = "Optional argument to provide the parameter file. Default assumes filename 'parameters.py' in the executing directory.")
@@ -31,6 +31,8 @@ parser.add_argument('-nq', '--noquestions', default = False, action = "store_tru
 	help = "Optional argument to not process question information from ASCs.")
 parser.add_argument('-nc', '--nocombine', default = False, action = "store_true", 
 	help = "Optional argument to not combine results files. If this is set, keepall will automatically be set.")
+parser.add_argument('-re', '--reeverything', default = False, action = "store_true",
+	help = "Convenient argument to set all of --refix, --resentences, and --requestions at once, reprocessing the entire set of results.")
 
 args = parser.parse_args()
 if args.filename:
@@ -38,10 +40,17 @@ if args.filename:
 else:	
 	parameters_loc = Path(os.path.dirname(os.path.realpath(__file__))) / "parameters.py"
 
+if args.reeverything:
+	args.refix = True
+	args.resentences = True
+	args.requestions = True
+
+# Deal with odd combinations of arguments and print appropriate warning/error messages
 if args.nofix and args.nosentences and args.noquestions and args.nocombine:
 	print("Nothing to do with all of nofix, nosentences, noquestions, and nocombine set. Exiting.")
 	sys.exit(0)
 
+# Safest thing is to do nothing
 if args.refix and args.nofix:
 	print("Warning: refix and nofix cannot both be set. nofix will be respected.")
 	args.refix = False
@@ -54,12 +63,15 @@ if args.noquestions and args.requestions:
 	print("Error: can't do both args.requestions and args.noquestions. args.noquestions will be respected.")
 	args.requestions = False
 
+# If we're not combining results, then make sure to keep them
 if args.nocombine:
 	args.keepall = True
 
+# If we are combining results without attempting to fix align them, we might lose data. Print a warning in this case
 if not args.nocombine and args.nofix:
 	print("Warning: combining results without fix aligning ASCs. If your ASCs have not been previously corrected, this can lead to errors due to missing data.")
 
+# We need pandas if we're doing these things, but not otherwise
 if not args.resentences or not args.requestions or not args.nocombine:
 	import pandas
 
@@ -68,26 +80,30 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 	# Read in and execute the parameters file
 	while True:
 		try:
+			# Add the file extension if it's not provided by the user
 			if not re.match('.*\.py$', str(parameters_loc)):
 				parameters_loc = Path(str(parameters_loc) + '.py')
+
+			# Read in and execute the parameters file, then break
 			parameters = open(parameters_loc,'r')
 			whole_file = parameters.read()
 			exec(whole_file)
 			break
 		except:
+			# If we can't find the parameters file, try again
 			parameters_loc = Path(input("Error: no parameters file found. Please specify a parameters file location: "))
 			if not re.match('.*\.py$', str(parameters_loc)):
 				parameters_loc = Path(str(parameters_loc) + '.py')
 
-	# If there is no asc_files_dir specified in the parameters file, assume it's in the current directory
-	# If the directory does not contain ASC files, prompt for one until we get one that does
+	# If there is no asc_files_dir specified in the parameters file, assume it's in the current directory. If the directory does not contain ASC files, prompt for one until we get one that does
 	while True:
 		if not 'asc_files_dir' in globals():
 			asc_files_dir = current_dir / "ASC"
+		elif not asc_files_dir:
+			asc_files_dir = current_dir / "ASC"
 
+		# If we need the ASC files and it been set to an empty string, assume it's the current directory
 		if not args.nofix or not args.nosentences or not args.noquestions:
-			if not asc_files_dir:
-				asc_files_dir = "."
 			try:
 				if len([f for f in os.listdir(asc_files_dir) if '.asc' in f]) == 0:
 					asc_files_dir = Path(input(f"Error: no ASC files found in '{asc_files_dir}'. If your ASC files have already been fix aligned, set the asc_files_dir to the location of your fix aligned files, and use the '--nofix' ('-nf') option. Please enter a directory containing ASC files: "))
@@ -104,6 +120,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 		else:
 			break
 
+	# If we're generating output, get the output directory and create it if it doesn't exist
 	if not args.nosentences or not args.noquestions or not args.nocombine:
 		if not 'output_dir' in globals():
 			output_dir = Path(current_dir) / "prASCed results"
@@ -166,7 +183,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 		def strip_quotes(input):
 			return re.sub(r'^\'|^"|\'$|"$', '', str(input))
 
-	# Stimuli loc is optional, but print a warning if we're not using it, also check for file_encoding
+	# Stimuli loc is optional, but print a warning if we're not using it
 	if not args.nocombine:
 		if not 'stimuli_loc' in globals():
 			stimuli_loc = "".join([current_dir / f for f in os.listdir(current_dir) if '-formatted.csv' in f])
@@ -184,9 +201,9 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 
 		stimuli_loc = Path(stimuli_loc)
 
-		# This can be determined automatically, but it takes a looooong time
-		if not 'file_encoding' in globals():
-			file_encoding = 'latin1'
+	# This can be determined automatically, but it takes a looooong time
+	if not 'file_encoding' in globals():
+		file_encoding = 'latin1'
 
 	if not args.nofix:
 		if not 'fix_align_loc' in globals():
@@ -504,65 +521,100 @@ if not args.resentences or not args.requestions or not args.noquestions or not a
 	with open(Path(config_json_loc), "r") as file:
 		config = json.load(file)
 
-		# Filter to the trial output that's included according to the config file
-		trial_output = []
-		if 'trial_output' in config:
-			trial_output = config['trial_output']
+	# Filter to the trial output that's included according to the config file
+	trial_output = []
+	if 'trial_output' in config:
+		trial_output = config['trial_output']
 
-		trial_output_excluded = [field for field in trial_output if 'exclude' in trial_output[field] and trial_output[field]['exclude'] == True]
-		trial_output_included = trial_output
+	trial_output_excluded = [column for column in trial_output if 'exclude' in trial_output[column] and trial_output[column]['exclude'] == True]
+	trial_output_included = trial_output
 
-		for field in trial_output_excluded:
-			del trial_output_included[field]
+	for column in trial_output_excluded:
+		del trial_output_included[column]
 
-		# Filter to the region output that's included according to the config file
-		region_output = []
-		if 'region_output' in config:
-			region_output = config['region_output']
+	# Filter to the region output that's included according to the config file
+	region_output = []
+	if 'region_output' in config:
+		region_output = config['region_output']
 
-		region_output_excluded = [field for field in region_output if 'exclude' in region_output[field] and region_output[field]['exclude'] == True]
-		region_output_included = region_output
+	region_output_excluded = [column for column in region_output if 'exclude' in region_output[column] and region_output[column]['exclude'] == True]
+	region_output_included = region_output
 
-		for field in region_output_excluded:
-			del region_output_included[field]
+	for column in region_output_excluded:
+		del region_output_included[column]
 
-		# Get a list of column names. Choose trial_output over region_output if both are included
-		included_column_names = []
-		for field in region_output_included:
-			if field in trial_output_included:
-				included_column_names.append(trial_output_included[field]['header'])
-			else:
-				included_column_names.append(region_output_included[field]['header'])
-
-		for field in trial_output_included:
-			if trial_output_included[field]['header'] not in included_column_names:
-				included_column_names.append(trial_output_included[field]['header'])
-
-		# Get variables corresponding to the filename, item_id, and item_condition column names, since we'll use those to join the results. That way we can rename the stimuli columns if the configuration file gives different ones to the sentences CSV
-		if 'filename' in trial_output_included:
-			filename_col_name = trial_output_included['filename']['header']
-		elif 'filename' in region_output_included:
-			filename_col_name = region_output_included['filename']['header']
+	# Get a list of column names. Choose trial_output over region_output if both are included
+	included_column_names = []
+	for column in region_output_included:
+		if column in trial_output_included:
+			included_column_names.append(trial_output_included[column]['header'])
 		else:
-			filename_col_name = 'filename'
+			included_column_names.append(region_output_included[column]['header'])
 
-		if 'item_id' in trial_output_included:
-			item_id_col_name = trial_output_included['item_id']['header']
-		elif 'item_id' in region_output_included:
-			item_id_col_name = region_output_included['item_id']['header']
-		else:
-			item_id_col_name = 'item_id'
+	for column in trial_output_included:
+		if trial_output_included[column]['header'] not in included_column_names:
+			included_column_names.append(trial_output_included[column]['header'])
 
-		if 'item_condition' in trial_output_included:
-			item_condition_col_name = trial_output_included['item_condition']['header']
-		elif 'item_condition' in region_output_included:
-			item_condition_col_name = region_output_included['item_condition_col_name']['header']
-		else:
-			item_condition_col_name = 'item_condition'
+	# If sideeye is outputting in wide format
+	if config['wide_format'] == True:
 
-		is_item_id_included = 'item_id' in trial_output_included or 'item_id' in region_output_included
-		is_filename_included = 'filename' in trial_output_included or 'filename' in region_output_included
-		is_item_condition_included = 'item_condition' in trial_output_included or 'item_condition' in region_output_included
+		# Figure out the trial measures included
+		trial_measures = []
+
+		if 'trial_measures' in config:
+			trial_measures = config['trial_measures']
+			trial_measures_excluded = [column for column in trial_measures if 'exclude' in trial_measures[column] and trial_measures[column]['exclude'] == True]
+
+		trial_measures_included = trial_measures
+
+		for column in trial_measures_excluded:
+			del trial_measures_included[column]
+
+		# Figure out the region measures included
+		region_measures = []
+
+		if 'region_measures' in config:
+			region_measures = config['region_measures']
+			region_measures_excluded = [column for column in region_measures if 'exclude' in region_measures[column] and region_measures[column]['exclude'] == True]
+
+		region_measures_included = region_measures
+
+		for column in region_measures_excluded:
+			del region_measures_included[column]
+
+		# Add the included fields to the included_column_names
+		for column in region_measures_included:
+			included_column_names.append(column)
+
+		for column in trial_measures_included:
+			if column not in included_column_names:
+				included_column_names.append(column)
+
+	# Get variables corresponding to the filename, item_id, and item_condition column names, since we'll use those to join the results. That way we can rename the stimuli columns if the configuration file gives different ones to the sentences CSV
+	if 'filename' in trial_output_included:
+		filename_col_name = trial_output_included['filename']['header']
+	elif 'filename' in region_output_included:
+		filename_col_name = region_output_included['filename']['header']
+	else:
+		filename_col_name = 'filename'
+
+	if 'item_id' in trial_output_included:
+		item_id_col_name = trial_output_included['item_id']['header']
+	elif 'item_id' in region_output_included:
+		item_id_col_name = region_output_included['item_id']['header']
+	else:
+		item_id_col_name = 'item_id'
+
+	if 'item_condition' in trial_output_included:
+		item_condition_col_name = trial_output_included['item_condition']['header']
+	elif 'item_condition' in region_output_included:
+		item_condition_col_name = region_output_included['item_condition_col_name']['header']
+	else:
+		item_condition_col_name = 'item_condition'
+
+	is_item_id_included = 'item_id' in trial_output_included or 'item_id' in region_output_included
+	is_filename_included = 'filename' in trial_output_included or 'filename' in region_output_included
+	is_item_condition_included = 'item_condition' in trial_output_included or 'item_condition' in region_output_included
 
 # Sentences
 if not args.nosentences:
@@ -763,11 +815,9 @@ if not args.noquestions:
 	if q_already_processed and not all(file in q_already_processed for file in [undir.sub('\\4', f) for f in file_list]) and os.path.isfile(subj_quest_file_name) and os.path.isfile(summary_file_name):
 		# Read in the new results to combine
 		new_subj_quest_results = pandas.read_csv(subj_quest_file_name, encoding = file_encoding, sep = " ")
-		os.remove(subj_quest_file_name)
 		new_subj_quest_results = pandas.DataFrame(new_subj_quest_results)
 		
 		new_question_summary_results = pandas.read_csv(summary_file_name, encoding = file_encoding, sep = " ")
-		os.remove(summary_file_name)
 		new_question_summary_results = pandas.DataFrame(new_question_summary_results)
 
 		# If we got the old results from the question txt files
@@ -780,6 +830,7 @@ if not args.noquestions:
 			added_question_summary_results.to_csv(summary_file_name, index = False, sep = ' ', mode = 'w+')
 		# Otherwise, we got the existing results from the results_combined file
 		elif not q_existing_results.empty:
+
 			# We need to recreate the question files that went into the combined results file
 			existing_subj_quest = q_existing_results[[filename_col_name, 'question_type', item_id_col_name, 'correct_answer', 'response', 'was_response_correct', 'response_RT']].drop_duplicates().reset_index(drop = True)
 			added_subj_quest_results = existing_subj_quest.append(new_subj_quest_results, sort = False)

@@ -1,5 +1,5 @@
 {
-  "wide_format": false,
+  "wide_format": true,
   "terminal_output": 0,
   "da1_fields" : {
     "index": 0,
@@ -172,11 +172,11 @@
       "header": "region_end"
     },
     "measure": {
-      "include": true,
+      "exclude": true,
       "header": "measure"
     },
     "value": {
-      "include": true,
+      "exclude": true,
       "header": "value"
     }
   },
@@ -210,11 +210,11 @@
       "header": "item_condition"
     },
     "measure": {
-      "include": true,
+      "exclude": true,
       "header": "measure"
     },
     "value": {
-      "include": true,
+      "exclude": true,
       "header": "value"
     }
   }
