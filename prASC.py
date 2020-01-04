@@ -371,7 +371,7 @@ if not args.nofix:
 		to_align_list = [strip_quotes(str(Path(asc_files_dir) / f)) for f in os.listdir(asc_files_dir) if not re.sub(r'\.asc', '_fa.asc', f) in os.listdir(fa_output_dir) and '.asc' in f and not '_fa.asc' in f]
 		if to_align_list:
 			asc_files_dir = 'c("' + '", "'.join(to_align_list) + '")'
-			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
+			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\)){1}(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))*\s*\)$')
 			if 'script_loc' and 'start_pts' in globals() and os.path.isfile(script_loc):
 				with open(script_loc, "r") as file:
 					script = file.read()
@@ -397,12 +397,12 @@ if not args.nofix:
 					start_pts = str(input("Error: start_pts not provided in script file. What is your start_pts matrix? "))
 
 			while not start_pts_regex.match(start_pts):
-				start_pts = str(input("Error: start_pts not formatted correctly. start_pts should be of the form 'rbind(c(x, y) [, c(x, y), ...])'. Please enter a valid start_pts matriX: "))
+				start_pts = str(input("Error: start_pts not formatted correctly. start_pts should be of the form 'rbind(c(x, y) [, c(x, y), ...])'. Please enter a valid start_pts matrix: "))
 		else:
 			asc_files_dir = ""
 	else:
 		if [f for f in os.listdir(Path(asc_files_dir)) if '.asc' in f and not '_fa.asc' in f]:
-			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
+			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\)){1}(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))*\s*\)$')
 			if 'script_loc' and 'start_pts' in globals() and os.path.isfile(script_loc):
 				with open(script_loc, "r") as file:
 					script = file.read()
@@ -642,7 +642,7 @@ if not args.noquestions:
 # Combine
 if not args.nocombine:
 	if args.noquestions and not args.nosentences:
-			print("Combining pre-existing question files. Assuming column names as specified in " + config_json_loc.name + ", and filenames 'subj_question_info.txt', 'question_summary.txt'. Assuming files are located in " + str(output_dir) + ".")
+		print("Combining pre-existing question files. Assuming column names as specified in " + config_json_loc.name + ", and filenames 'subj_question_info.txt', 'question_summary.txt'. Assuming files are located in " + str(output_dir) + ".")
 	elif args.nosentences and not args.noquestions:
 		print("Combining pre-existing results. Assuming column names as specified in " + config_json_loc.name + ", and filename 'results.csv'. Assuming results file is located in " + str(output_dir) + '.')
 	elif args.nosentences and args.noquestions:
