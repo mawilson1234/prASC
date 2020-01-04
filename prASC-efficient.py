@@ -395,7 +395,7 @@ if not args.nofix:
 		to_align_list = [strip_quotes(str(Path(asc_files_dir) / f)) for f in os.listdir(asc_files_dir) if not re.sub(r'\.asc', '_fa.asc', f) in os.listdir(fa_output_dir) and '.asc' in f and not '_fa.asc' in f]
 		if to_align_list:
 			asc_files_dir = 'c("' + '", "'.join(to_align_list) + '")'
-			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
+			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\)){1}(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))*\s*\)$')
 			if 'script_loc' and 'start_pts' in globals() and os.path.isfile(script_loc):
 				with open(script_loc, "r") as file:
 					script = file.read()
@@ -426,7 +426,7 @@ if not args.nofix:
 			asc_files_dir = ""
 	else:
 		if [f for f in os.listdir(Path(asc_files_dir)) if '.asc' in f and not '_fa.asc' in f]:
-			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))?\s*\)$')
+			start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\)){1}(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))*\s*\)$')
 			if 'script_loc' and 'start_pts' in globals() and os.path.isfile(script_loc):
 				with open(script_loc, "r") as file:
 					script = file.read()
