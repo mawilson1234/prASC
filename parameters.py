@@ -45,19 +45,19 @@
 ###### Default is %current_dir%/prASCed results. Required if doing anything other than running fix_align. ############
 ######################################################################################################################
 
-#asc_files_dir = "ASC"
+asc_files_dir = "ASC"
 
 #fa_output_dir = "ASC/Fix Aligned"
 #da1_output_dir = "ASC/da1 files"
-#script_loc = ""
-#fix_align_loc = "fix_align_v0p92"
-#robodoc_loc = "Robodoc"
-#make_regions_loc = "makeRegions_forRobodoc"
+script_loc = "Resources/Horse"
+fix_align_loc = "Resources/fix_align_v0p92"
+robodoc_loc = "Resources/Robodoc"
+make_regions_loc = "Resources/makeRegions_forRobodoc"
 
-#config_json_loc = "config"
-#sentences_txt_loc = "sentences"
+config_json_loc = "Resources/config"
+sentences_txt_loc = "Resources/sentences"
 
-#stimuli_loc = ""
+stimuli_loc = "Resources/Stimuli-formatted"
 #file_encoding = 'latin1'
 
 #output_dir = "prASCed results"
@@ -70,7 +70,7 @@
 # start_pts must be set manually if no script file is provided and fix_align is run, #################################
 # or if the optionally provided script file doesn't include them. ####################################################
 ######################################################################################################################
-start_pts = ""
+start_pts = "rbind(c(20, 368))"
 #xy_bounds = "NULL"
 #keep_y_var = "FALSE"
 #use_run_rule = "TRUE"
