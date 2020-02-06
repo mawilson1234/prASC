@@ -1,7 +1,9 @@
 ##############################################################################################
-##### Master script prASC.py for processing ASCs to R-ready data frame by Michael Wilson #####
-########### Based on Preprocessing_FromASCs.py and question_acc.py by Brian Dillon ###########
-########################### Calls fix_align by Andrew Cohen (2013) ###########################
+##### Master script RoboprASC.py for processing ASCs to R-ready data frame by Michael Wilson #
+##### Based on Preprocessing_FromASCs.py and question_acc.py by Brian Dillon #################
+##### Calls Robodoc by Adrian Staub, Jesse Harris, and Chuck Clifton, ########################
+##### makeRegions_forRobodoc by Shevaun Lewis (with slight modifications by the author), #####
+##### and fix_align by Andrew Cohen (2013) ###################################################
 ##############################################################################################
 
 import os, re, sys, subprocess, argparse
