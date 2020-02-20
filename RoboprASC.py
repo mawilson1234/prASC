@@ -601,22 +601,23 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 					highest_cond = 0
 
 		# Get .reg from sentences.txt file
-		if not 'make_regions_loc' in globals():
-			make_regions_loc = current_dir / "makeRegions_forRobodoc.py"
-
-		if not re.match('.*\.py$', str(make_regions_loc).lower()):
-			make_regions_loc = Path(str(make_regions_loc) + '.py')
-
-		while not os.path.isfile(make_regions_loc):
-			make_regions_loc = Path(input("Error: no makeRegions_forRobodoc.py file found. Please enter a valid location: "))
-			if not make_regions_loc:
-				make_regions_loc = current_dir / 'makeRegions_forRobodoc.py'
+		if blink_reg_exclude == "y":
+			if not 'make_regions_loc' in globals():
+				make_regions_loc = current_dir / "makeRegions_forRobodoc.py"
+	
 			if not re.match('.*\.py$', str(make_regions_loc).lower()):
 				make_regions_loc = Path(str(make_regions_loc) + '.py')
 
-		make_regions_loc = Path(make_regions_loc)
-		make_regions = open(make_regions_loc, 'r').read()
-		exec(make_regions)
+			while not os.path.isfile(make_regions_loc):
+				make_regions_loc = Path(input("Error: no makeRegions_forRobodoc.py file found. Please enter a valid location: "))
+				if not make_regions_loc:
+					make_regions_loc = current_dir / 'makeRegions_forRobodoc.py'
+				if not re.match('.*\.py$', str(make_regions_loc).lower()):
+					make_regions_loc = Path(str(make_regions_loc) + '.py')
+
+			make_regions_loc = Path(make_regions_loc)
+			make_regions = open(make_regions_loc, 'r').read()
+			exec(make_regions)
 
 		start_pts_regex = re.compile('^rbind\s*\(\s*(c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\)){1}(\s*,\s*c\s*\(\s*[0-9]+\s*,\s*[0-9]+\s*\))*\s*\)$')
 
@@ -938,7 +939,10 @@ if args.robodoc:
 		robodoc = open(robodoc_loc, 'r').read()
 		print("Processing ASCs to da1s with Robodoc...")
 		exec(robodoc)
-		os.remove(reg_file_loc)
+
+		# Delete the reg file if we used it
+		if os.path.isfile(reg_file_loc):
+			os.remove(reg_file_loc)
 
 		# Do this for questions later, since they always need the ASCs
 		orig_fa_output_dir = fa_output_dir
@@ -949,7 +953,7 @@ if args.robodoc:
 		print("All ASCs to be processed have existing da1 files. Skipping Robodoc...")
 
 # Get correct names for columns to use when not reprocessing all data
-if not args.resentences or not args.requestions or not args.noquestions or not args.nocombine:
+if (not args.nosentences or not args.noquestions or not args.nocombine) and (not args.resentences or not args.requestions or not args.noquestions or not args.nocombine):
 	import json
 
 	with open(Path(config_json_loc), "r") as file:
