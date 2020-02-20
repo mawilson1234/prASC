@@ -941,7 +941,7 @@ if args.robodoc:
 		exec(robodoc)
 
 		# Delete the reg file if we used it
-		if os.path.isfile(reg_file_loc):
+		if 'reg_file_loc' in globals() and os.path.isfile(reg_file_loc):
 			os.remove(reg_file_loc)
 
 		# Do this for questions later, since they always need the ASCs
