@@ -58,14 +58,15 @@ if args.nofix and args.nosentences and args.noquestions and args.nocombine:
 	print("Nothing to do with all of nofix, nosentences, noquestions, and nocombine set. Exiting.")
 	sys.exit(0)
 
+# Set robodoc to true if rerobodoc is set to true
+if args.rerobodoc:
+	args.robodoc = True
+
 # If Robodoc is set but we're not doing sentences, there's nothing for it to do
 if args.nosentences and args.robodoc:
 	print("Nothing for Robodoc to do without processing sentences. nosentences will be respected.")
 	args.robodoc = False
-
-# Set robodoc to true if rerobodoc is set to true
-if args.rerobodoc:
-	args.robodoc = True
+	args.rerobodoc = False
 
 # Safest thing is to do nothing
 if args.refix and args.nofix:
