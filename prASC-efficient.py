@@ -664,7 +664,7 @@ if not args.nosentences:
 		new_results = pandas.read_csv(csv_loc, encoding = file_encoding)
 		#os.remove(csv_loc)
 		new_results = pandas.DataFrame(new_results)
-		added_results = s_existing_results.append(new_results, sort = False)
+		added_results = s_existing_results.append(new_results)
 		added_results.to_csv(csv_loc, index = False, na_rep = 'NA')
 	# If we're keeping all the intermediate results, even if we didn't process anything, we can still regenerate the intermediate file
 	elif not args.resentences and not s_existing_results.empty and args.keepall:
@@ -711,8 +711,11 @@ if not args.noquestions:
 
 			# Retain only the subjects in common between the two for later
 			# We have to do this carefully so we don't actually overwrite the column text with the undirectorified version
-			existing_subj_quest = existing_subj_quest[filename_col_name].isin([subj for subj in existing_subj_quest[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])
-			existing_summary_file = existing_summary_file[filename_col_name].isin([subj for subj in existing_summary_file[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])
+			#existing_subj_quest = existing_subj_quest[filename_col_name].isin([subj for subj in existing_subj_quest[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])
+			#existing_summary_file = existing_summary_file[filename_col_name].isin([subj for subj in existing_summary_file[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])
+			# Get all the rows of existing_subj_quest and existing_summary_file for which the filename of that row is in the list of unique subjects already processed, once we strip off the directory information
+			existing_subj_quest = existing_subj_quest[existing_subj_quest[filename_col_name].isin([subj for subj in existing_subj_quest[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])]
+			existing_summary_file = existing_summary_file[existing_summary_file[filename_col_name].isin([subj for subj in existing_summary_file[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])]
 		except:
 			if os.path.isfile(output_dir / 'results_combined.csv') and is_filename_included:
 				q_existing_results = pandas.read_csv(output_dir / 'results_combined.csv', encoding = file_encoding, low_memory = False)
@@ -823,21 +826,21 @@ if not args.noquestions:
 		# If we got the old results from the question txt files
 		if not existing_subj_quest.empty and not existing_summary_file.empty:
 			# Append the new files we just wrote out to the existing results
-			added_subj_quest_results = existing_subj_quest.append(new_subj_quest_results, sort = False)
+			added_subj_quest_results = existing_subj_quest.append(new_subj_quest_results)
 			added_subj_quest_results.to_csv(subj_quest_file_name, index = False, sep = ' ', mode = 'w+')
 
-			added_question_summary_results = existing_summary_file.append(new_question_summary_results, sort = False)
+			added_question_summary_results = existing_summary_file.append(new_question_summary_results)
 			added_question_summary_results.to_csv(summary_file_name, index = False, sep = ' ', mode = 'w+')
 		# Otherwise, we got the existing results from the results_combined file
 		elif not q_existing_results.empty:
 
 			# We need to recreate the question files that went into the combined results file
 			existing_subj_quest = q_existing_results[[filename_col_name, 'question_type', item_id_col_name, 'correct_answer', 'response', 'was_response_correct', 'response_RT']].drop_duplicates().reset_index(drop = True)
-			added_subj_quest_results = existing_subj_quest.append(new_subj_quest_results, sort = False)
+			added_subj_quest_results = existing_subj_quest.append(new_subj_quest_results)
 			added_subj_quest_results.to_csv(subj_quest_file_name, index = False, sep = ' ', mode = 'w+', na_rep = "NA")
 
 			existing_summary_file = q_existing_results[[filename_col_name, 's_number_questions', 's_num_correct_answers', 's_total_prop_correct']].drop_duplicates().reset_index(drop = True)
-			added_question_summary_results = existing_summary_file.append(new_question_summary_results, sort = False)
+			added_question_summary_results = existing_summary_file.append(new_question_summary_results)
 			added_question_summary_results.to_csv(summary_file_name, index = False, sep = ' ', mode = 'w+', na_rep = "NA")
 	elif not args.requestions and not q_existing_results.empty:
 		if not os.path.isfile(subj_quest_file_name):
