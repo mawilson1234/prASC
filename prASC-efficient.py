@@ -89,7 +89,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 			whole_file = parameters.read()
 			exec(whole_file)
 			break
-		except:
+		except Exception:
 			# If we can't find the parameters file, try again
 			parameters_loc = Path(input("Error: no parameters file found. Please specify a parameters file location: "))
 			if not re.match('.*\.py$', str(parameters_loc)):
@@ -111,7 +111,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 						asc_files_dir = current_dir / "ASC"
 				else:
 					break
-			except:
+			except Exception:
 				asc_files_dir = Path(input(f"Error: no ASC files found in '{asc_files_dir}'. If your ASC files have already been fix aligned, set the asc_files_dir to the location of your fix aligned files, and use the '--nofix' ('-nf') option. Please enter a directory containing ASC files: "))
 				if not asc_files_dir:
 					asc_files_dir = current_dir / "ASC"
@@ -473,7 +473,7 @@ if not args.nofix:
 		if os.path.isfile("fix_align_tmp.r"):
 			try:
 				os.remove("fix_align_tmp.r")
-			except:
+			except Exception:
 				print("Unable to delete existing fix_align_tmp file. Exiting.")
 				sys.exit(1)
 
@@ -483,24 +483,24 @@ if not args.nofix:
 			try:	
 				for file in old_fas:
 					os.remove(file)
-			except:
+			except Exception:
 				print("Unable to delete old fas files.")
 
 		open("fix_align_tmp.r", "a").write(fix_align_with_call)
 		print("Processing ASC files with fix_align...")
 		try:
 			subprocess.check_call("Rscript --vanilla fix_align_tmp.r", shell = True)
-		except:
+		except Exception:
 			print("Error: fix_align terminated unexpectedly. Exiting.")
 			try:
 				os.remove("fix_align_tmp.r")
-			except:
+			except Exception:
 				print("Unable to delete fix_align_tmp file.")
 				sys.exit(1)
 
 		try:
 			os.remove("fix_align_tmp.r")
-		except:
+		except Exception:
 			print("Unable to delete fix_align_tmp file. Make sure to delete manually before running this script again.")
 	else:
 		# There aren't any asc files to process, so print a message to that effect
@@ -716,7 +716,7 @@ if not args.noquestions:
 			# Get all the rows of existing_subj_quest and existing_summary_file for which the filename of that row is in the list of unique subjects already processed, once we strip off the directory information
 			existing_subj_quest = existing_subj_quest[existing_subj_quest[filename_col_name].isin([subj for subj in existing_subj_quest[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])]
 			existing_summary_file = existing_summary_file[existing_summary_file[filename_col_name].isin([subj for subj in existing_summary_file[filename_col_name].unique().tolist() if undir.sub('\\4', subj) in q_already_processed])]
-		except:
+		except Exception:
 			if os.path.isfile(output_dir / 'results_combined.csv') and is_filename_included:
 				q_existing_results = pandas.read_csv(output_dir / 'results_combined.csv', encoding = file_encoding, low_memory = False)
 				q_existing_results = pandas.DataFrame(q_existing_results)
@@ -744,7 +744,7 @@ if not args.noquestions:
 
 			try:
 				filename = open(file, 'r')
-			except:
+			except Exception:
 				print("File %s could not be found." %file)
 				sys.exit(1)
 
@@ -806,7 +806,7 @@ if not args.noquestions:
 
 		try:
 			os.remove(output_dir / 'temp_quest_file')
-		except:
+		except Exception:
 			print("Unable to delete temp_quest_file. Continuing...")
 
 		subj_quest_file.close()
@@ -974,20 +974,20 @@ if not args.nocombine:
 			if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli:
 				try:
 					os.remove(csv_loc)
-				except:
+				except Exception:
 					print("Unable to delete non-combined results file.")
 
 			# If we combined the questions into the results, delete them
 			if combined_s_subj_quest or combined_q_stimuli:
 				try:
 					os.remove(subj_quest_file_name)
-				except:
+				except Exception:
 					print("Unable to delete non-combined questions file.")
 
 			if combined_s_questsum or combined_q_questsum:
 				try:
 					os.remove(summary_file_name)
-				except:
+				except Exception:
 					print("Unable to delete non-combined questions summary file.")
 
 print("Completed successfully!")
