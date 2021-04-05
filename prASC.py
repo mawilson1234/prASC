@@ -65,7 +65,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 			whole_file = parameters.read()
 			exec(whole_file)
 			break
-		except:
+		except Exception:
 			parameters_loc = Path(input("Error: no parameters file found. Please specify a parameters file location: "))
 			if not re.match('.*\.py$', str(parameters_loc)):
 				parameters_loc = Path(str(parameters_loc) + '.py')
@@ -87,7 +87,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 						asc_files_dir = current_dir / "ASC"
 				else:
 					break
-			except:
+			except Exception:
 				asc_files_dir = Path(input(f"Error: no ASC files found in '{asc_files_dir}'. If your ASC files have already been fix aligned, set the asc_files_dir to the location of your fix aligned files, and use the '--nofix' ('-nf') option. Please enter a directory containing ASC files: "))
 				if not asc_files_dir:
 					asc_files_dir = current_dir / "ASC"
@@ -449,7 +449,7 @@ if not args.nofix:
 		if os.path.isfile("fix_align_tmp.r"):
 			try:
 				os.remove("fix_align_tmp.r")
-			except:
+			except Exception:
 				print("Unable to delete existing fix_align_tmp file. Exiting...")
 				sys.exit(1)
 
@@ -460,24 +460,24 @@ if not args.nofix:
 			try:	
 				for file in old_fas:
 					os.remove(file)
-			except:
+			except Exception:
 				print("Unable to delete old fas files.")
 
 		open("fix_align_tmp.r", "a").write(fix_align_with_call)
 		print("Processing ASC files with fix_align...")
 		try:
 			subprocess.check_call("Rscript --vanilla fix_align_tmp.r", shell = True)
-		except:
+		except Exception:
 			print("Error: fix_align terminated unexpectedly. Exiting...")
 			try:
 				os.remove("fix_align_tmp.r")
-			except:
+			except Exception:
 				print("Unable to delete fix_align_tmp file.")
 				sys.exit(1)
 
 		try:
 			os.remove("fix_align_tmp.r")
-		except:
+		except Exception:
 			print("Unable to delete fix_align_tmp file. Make sure to delete manually before running this script again.")
 	else:
 		# There aren't any asc files to process, so print a message to that effect
@@ -571,7 +571,7 @@ if not args.noquestions:
 	for file in file_list:
 		try:
 			filename = open(file, 'r')
-		except:
+		except Exception:
 			print("File %s could not be found." %file)
 			sys.exit(1)
 
@@ -633,7 +633,7 @@ if not args.noquestions:
 
 	try:
 		os.remove(output_dir / 'temp_quest_file')
-	except:
+	except Exception:
 		print("Unable to delete temp_quest_file. Continuing...")
 
 	subj_quest_file.close()
@@ -761,20 +761,20 @@ if not args.nocombine:
 			if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli:
 				try:
 					os.remove(csv_loc)
-				except:
+				except Exception:
 					print("Unable to delete non-combined results file.")
 
 			# If we combined the questions into the results, delete them
 			if combined_s_subj_quest or combined_q_stimuli:
 				try:
 					os.remove(subj_quest_file_name)
-				except:
+				except Exception:
 					print("Unable to delete non-combined questions file.")
 
 			if combined_s_questsum or combined_q_questsum:
 				try:
 					os.remove(summary_file_name)
-				except:
+				except Exception:
 					print("Unable to delete non-combined questions summary file.")
 
 print("Completed successfully!")
