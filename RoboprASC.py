@@ -107,7 +107,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 			whole_file = parameters.read()
 			exec(whole_file)
 			break
-		except:
+		except Exception:
 			# If we can't find the parameters file, try again
 			parameters_loc = Path(input("Error: no parameters file found. Please specify a parameters file location: "))
 			if not re.match('.*\.py$', str(parameters_loc)):
@@ -129,7 +129,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 						asc_files_dir = current_dir / "ASC"
 				else:
 					break
-			except:
+			except Exception:
 				asc_files_dir = Path(input(f"Error: no ASC files found in '{asc_files_dir}'. If your ASC files have already been fix aligned, set the asc_files_dir to the location of your fix aligned files, and use the '--nofix' ('-nf') option. Please enter a directory containing ASC files: "))
 				if not asc_files_dir:
 					asc_files_dir = current_dir / "ASC"
@@ -312,7 +312,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 					DC = int(DC)
 					if not(DC == 0 or DC == 1):
 						raise Exception
-				except:
+				except Exception:
 					DC = input("Error: DC must be 0 or 1. Enter 1 if any trial has a display change, 0 otherwise: ")
 
 		else:
@@ -331,7 +331,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 			while not isinstance(min_change_time, int):
 				try:
 					min_change_time = int(min_change_time)
-				except:
+				except Exception:
 					min_change_time = input("Error: min_change_time must be a number. How many ms before the end of the saccade must the display change take place? ")
 					if not min_change_time: 
 						min_change_time = -7
@@ -348,7 +348,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				auto_exclude_DC = int(auto_exclude_DC)
 				if not(auto_exclude_DC == 0 or auto_exclude_DC == 1):
 					raise Exception
-			except:
+			except Exception:
 				auto_exclude_DC = input("Error: auto_exclude_DC must be 0 or 1. Enter 1 to automatically exclude subjects who had too many display change errors, 0 to not: ")
 				if not auto_exclude_DC: 
 					auto_exclude_DC = 0
@@ -365,7 +365,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				auto_exclude = int(auto_exclude)
 				if not(auto_exclude == 0 or auto_exclude == 1):
 					raise Exception
-			except:
+			except Exception:
 				auto_exclude = input("Error: auto_exclude must be 0 or 1. Enter 1 to automatically exclude subjects who lose too many trials due to blinks, 0 to not exclude: ")
 				if not auto_exclude:
 					auto_exclude = 0
@@ -379,7 +379,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 					exclude_threshold = int(exclude_threshold)
 					if not(exclude_threshold >= 0):
 						raise Exception
-				except:
+				except Exception:
 					exclude_threshold = input("Error: exclude_threshold must be a positive integer or 0. Enter the max number of rejected trials in any condition due to exclusion by a blink: ")
 					if not exclude_threshold:
 						exclude_threshold = 4
@@ -392,7 +392,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 					abs_exclude_threshold = int(abs_exclude_threshold)
 					if not(abs_exclude_threshold >= 0):
 						raise Exception
-				except:
+				except Exception:
 					abs_exclude_threshold = input("Error: abs_exclude_threshold must be a positive integer or 0. Enter the max number of rejected trials overall for blinks: ")
 					if not abs_exclude_threshold:
 						abs_exclude_threshold = 9
@@ -405,7 +405,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				blink_num_crit = int(blink_num_crit)
 				if not(blink_num_crit >= 0):
 					raise Exception
-			except:
+			except Exception:
 				blink_num_crit = input("Error: blink_num_crit must be a positive integer or 0. Enter the max number of allowable blinks before a trial is excluded: ")
 				if not blink_num_crit:
 					blink_num_crit = 1000
@@ -418,7 +418,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				blink_dur_crit = int(blink_dur_crit)
 				if not(blink_dur_crit >= 0):
 					raise Exception
-			except:
+			except Exception:
 				blink_dur_crit = input("Error: blink_dur_crit must be a positive integer or 0. Enter the max allowable duration of a blink before a trial is excluded: ")
 				if not blink_dur_crit:
 					blink_dur_crit = 10000
@@ -439,7 +439,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 
 				if not (blink_reg_exclude == 'y' or blink_reg_exclude == 'n'):
 					raise Exception
-			except:
+			except Exception:
 				blink_reg_exclude = input("Error: blink_reg_exclude must be 'y' or 'n'. Enter 'y' to exclude trials with a blink on the critical region, 'n' to not: ")
 				if blink_reg_exclude == "":
 					blink_reg_exclude = "n"
@@ -454,7 +454,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 					blink_region = int(blink_region)
 					if blink_region >= 0:
 						raise Exception
-				except:
+				except Exception:
 					blink_region = input("Error: blink_region to exclude must be a positive integer or 0. Please enter the number corresponding to your critical region: ")
 
 		if not 'blink_gopast' in globals():
@@ -472,7 +472,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				blink_gopast = int(blink_gopast)
 				if not(blink_gopast == 0 or blink_gopast == 1):
 					raise Exception
-			except:
+			except Exception:
 				blink_gopast = input("Error: invalid setting for blink_gopast. Enter 0 to exclude trials with blinks during first pass on blink_region, 1 to exclude trials with blinks during gopast: ")
 
 		if not 'saccade_dur_crit' in globals():
@@ -486,7 +486,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				saccade_dur_crit = int(saccade_dur_crit)
 				if not saccade_dur_crit >= 0:
 					raise Exception
-			except:
+			except Exception:
 				saccade_dur_crit = input("Error: invalid setting for saccade_dur_crit. Enter the cutoff in ms to exclude trials with a saccade coming into, in, or exiting the critical region: ")
 				if not saccade_dur_crit:
 					saccade_dur_crit = 1000
@@ -500,7 +500,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 						blink_region = int(blink_region)
 						if blink_region >= 0:
 							raise Exception
-					except:
+					except Exception:
 						blink_region = input("Error: blink_region to exclude must be a positive integer or 0. Please enter the number corresponding to your critical region: ")
 
 		if not 'short_crit' in globals():
@@ -514,7 +514,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				short_crit = int(short_crit)
 				if not short_crit >= 1:
 					raise Exception
-			except:
+			except Exception:
 				short_crit = input("Error: short_crit is not set. Fixations shorter than this in ms will be combined with a preceding or following fixation that is within one character. 1 will result in no combination: ")
 				if not short_crit:
 					short_crit = 1
@@ -567,7 +567,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 		if not lowest_cond:
 			try:
 				lowest_cond = get_conds(sentences_txt_loc)[0]
-			except:
+			except Exception:
 				pass
 
 		while not isinstance(lowest_cond, int) or not(lowest_cond >= 0):
@@ -577,7 +577,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				lowest_cond = int(lowest_cond)
 				if not lowest_cond >= 0:
 					raise Exception
-			except:
+			except Exception:
 				lowest_cond = input("Error: lowest_cond must be a positive integer or 0. Enter the number of the lowest condition to analyze as in your EyeTrack script: ")
 				if not lowest_cond:
 					lowest_cond = 0
@@ -585,7 +585,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 		if not highest_cond:
 			try:
 				highest_cond = get_conds(sentences_txt_loc)[1]
-			except:
+			except Exception:
 				pass
 
 		while not isinstance(highest_cond, int) or not(highest_cond >= lowest_cond):
@@ -595,7 +595,7 @@ with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
 				highest_cond = int(highest_cond)
 				if not highest_cond >= lowest_cond:
 					raise Exception
-			except:
+			except Exception:
 				highest_cond = input("Error: highest_cond must be a positive integer greater than or equal to lowest_cond. Enter the number of the highest condition to analyze as in your EyeTrack script: ")
 				if not highest_cond:
 					highest_cond = 0
@@ -886,7 +886,7 @@ if not args.nofix:
 		if os.path.isfile("fix_align_tmp.r"):
 			try:
 				os.remove("fix_align_tmp.r")
-			except:
+			except Exception:
 				print("Unable to delete existing fix_align_tmp file. Exiting.")
 				sys.exit(1)
 
@@ -896,24 +896,24 @@ if not args.nofix:
 			try:	
 				for file in old_fas:
 					os.remove(file)
-			except:
+			except Exception:
 				print("Unable to delete old fas files.")
 
 		open("fix_align_tmp.r", "a").write(fix_align_with_call)
 		print("Processing ASC files with fix_align...")
 		try:
 			subprocess.check_call("Rscript --vanilla fix_align_tmp.r", shell = True)
-		except:
+		except Exception:
 			print("Error: fix_align terminated unexpectedly. Exiting.")
 			try:
 				os.remove("fix_align_tmp.r")
-			except:
+			except Exception:
 				print("Unable to delete fix_align_tmp file.")
 				sys.exit(1)
 
 		try:
 			os.remove("fix_align_tmp.r")
-		except:
+		except Exception:
 			print("Unable to delete fix_align_tmp file. Make sure to delete manually before running this script again.")
 	else:
 		# There aren't any asc files to process, so print a message to that effect
@@ -1166,7 +1166,7 @@ if not args.noquestions:
 			existing_subj_quest = existing_subj_quest[existing_subj_quest[filename_col_name].isin([subj for subj in existing_subj_quest[filename_col_name].unique().tolist() if undir.sub('\\5', subj) in q_already_processed])]
 			existing_summary_file = existing_summary_file[existing_summary_file[filename_col_name].isin([subj for subj in existing_summary_file[filename_col_name].unique().tolist() if undir.sub('\\5', subj) in q_already_processed])]
 			# Here is the problem; we want to retain the portion of the file that has the subjects, not just whether the subject was in the file #############################################
-		except:
+		except Exception:
 			if os.path.isfile(output_dir / 'results_combined.csv') and is_filename_included:
 				q_existing_results = pandas.read_csv(output_dir / 'results_combined.csv', encoding = file_encoding, low_memory = False)
 				q_existing_results = pandas.DataFrame(q_existing_results)
@@ -1194,7 +1194,7 @@ if not args.noquestions:
 
 			try:
 				filename = open(file, 'r')
-			except:
+			except Exception:
 				print("File %s could not be found." %file)
 				sys.exit(1)
 
@@ -1256,7 +1256,7 @@ if not args.noquestions:
 
 		try:
 			os.remove(output_dir / 'temp_quest_file')
-		except:
+		except Exception:
 			print("Unable to delete temp_quest_file. Continuing...")
 
 		subj_quest_file.close()
@@ -1428,20 +1428,20 @@ if not args.nocombine:
 			if combined_s_subj_quest or combined_s_questsum or combined_s_stimuli:
 				try:
 					os.remove(csv_loc)
-				except:
+				except Exception:
 					print("Unable to delete non-combined results file.")
 
 			# If we combined the questions into the results, delete them
 			if combined_s_subj_quest or combined_q_stimuli:
 				try:
 					os.remove(subj_quest_file_name)
-				except:
+				except Exception:
 					print("Unable to delete non-combined questions file.")
 
 			if combined_s_questsum or combined_q_questsum:
 				try:
 					os.remove(summary_file_name)
-				except:
+				except Exception:
 					print("Unable to delete non-combined questions summary file.")
 
 print("Completed successfully!")
