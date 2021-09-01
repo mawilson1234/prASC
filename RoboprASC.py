@@ -91,7 +91,12 @@ if not args.nocombine and args.nofix:
 
 # We need pandas if we're doing these things, but not otherwise
 if not args.resentences or not args.requestions or not args.nocombine:
-	import pandas
+	try:
+		import pandas
+	except:
+		print("Error: pandas not found. Have you installed it with 'pip install pandas'? Exiting...")
+		time.sleep(5)
+		sys.exit(1)
 
 # Read in the parameters file and set default values
 with Path(os.path.dirname(os.path.realpath(__file__))) as current_dir:
@@ -874,7 +879,7 @@ if not args.nofix:
 	# If there are ASC files to process, process them
 	if strip_quotes(asc_files_dir):
 		# Construct the function call
-		fa_call = "fix_align(start_pts = " + start_pts + ", " + 'asc_files = ' + asc_files_dir.replace(os.sep, '/') + ', ' + "xy_bounds = " + xy_bounds + ", " + "keep_y_var = " + keep_y_var + ", " + "use_run_rule = " + use_run_rule + ", " + "trial_plots = " + trial_plots + ", " + "save_trial_plots = " + save_trial_plots + ", " + "summary_file = " + summary_file + ", "  +"show_image = " + show_image + ", " + 'fa_dir = "' + strip_quotes(str(fa_output_dir)).replace(os.sep, '/') + '", ' + "start_flag = " + start_flag + ", " +"den_sd_cutoff = " + den_sd_cutoff + ", " + "den_ratio_cutoff = " + den_ratio_cutoff + ", " + "k_bounds = " + k_bounds + ", " + "o_bounds = " + o_bounds + ", " + "s_bounds = " + s_bounds + ")"
+		fa_call = "\n\nfix_align(start_pts = " + start_pts + ", " + 'asc_files = ' + asc_files_dir.replace(os.sep, '/') + ', ' + "xy_bounds = " + xy_bounds + ", " + "keep_y_var = " + keep_y_var + ", " + "use_run_rule = " + use_run_rule + ", " + "trial_plots = " + trial_plots + ", " + "save_trial_plots = " + save_trial_plots + ", " + "summary_file = " + summary_file + ", "  +"show_image = " + show_image + ", " + 'fa_dir = "' + strip_quotes(str(fa_output_dir)).replace(os.sep, '/') + '", ' + "start_flag = " + start_flag + ", " +"den_sd_cutoff = " + den_sd_cutoff + ", " + "den_ratio_cutoff = " + den_ratio_cutoff + ", " + "k_bounds = " + k_bounds + ", " + "o_bounds = " + o_bounds + ", " + "s_bounds = " + s_bounds + ")"
 
 		# Write out a temp fix_align file with the function call, run it, and delete it
 		fix_align = open(fix_align_loc, "r").read()
@@ -1096,7 +1101,14 @@ if not args.nosentences:
 		sentences_file_list = [file for file in file_list if undir.sub('\\5', file) not in s_already_processed]
 
 	if sentences_file_list:
-		import sideeye
+		if not args.nosentences:
+			try:
+				import sideeye
+			except:
+				print("Error: sideeye not found. Have you installed it with 'pip install sideeye'? Exiting...")
+				time.sleep(5)
+				sys.exit(1)
+
 		print("Processing sentences with SideEye (this may take a while)...")
 		sideEyeConfig = sideeye.config.Configuration(str(config_json_loc))
 		sideeye_files = sideeye.parser.experiment.parse_files(sentences_file_list, str(sentences_txt_loc), sideEyeConfig)
